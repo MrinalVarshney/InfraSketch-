@@ -1,0 +1,382 @@
+{
+  "connected_services": [
+    {
+      "name": "Web and API Stack",
+      "tags": {
+        "Project": "AdvancedApp",
+        "Environment": "test"
+      },
+      "services": [
+        {
+          "provider": "kubernetes",
+          "type": "deployment",
+          "id": "web-deploy",
+          "metadata": {
+            "name": "web-app",
+            "labels": {
+              "app": "web-app"
+            }
+          },
+          "spec": {
+            "replicas": 3,
+            "selector": {
+              "matchLabels": {
+                "app": "web-app"
+              }
+            },
+            "template": {
+              "metadata": {
+                "labels": {
+                  "app": "web-app"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "name": "web-app-container",
+                    "image": "node:18",
+                    "port": 3000
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "provider": "kubernetes",
+          "type": "service",
+          "id": "web-service",
+          "metadata": {
+            "name": "web-app-service",
+            "labels": {
+              "app": "web-app"
+            }
+          },
+          "spec": {
+            "type": "NodePort",
+            "selector": {
+              "app": "web-app"
+            },
+            "ports": [
+              {
+                "port": 3000,
+                "targetPort": 3000,
+                "nodePort": 30080
+              }
+            ]
+          }
+        },
+        {
+          "provider": "kubernetes",
+          "type": "deployment",
+          "id": "api-deploy",
+          "metadata": {
+            "name": "api-service",
+            "labels": {
+              "app": "api-service"
+            }
+          },
+          "spec": {
+            "replicas": 2,
+            "selector": {
+              "matchLabels": {
+                "app": "api-service"
+              }
+            },
+            "template": {
+              "metadata": {
+                "labels": {
+                  "app": "api-service"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "name": "api-container",
+                    "image": "node:18",
+                    "port": 4000
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "provider": "kubernetes",
+          "type": "service",
+          "id": "api-service",
+          "metadata": {
+            "name": "api-service",
+            "labels": {
+              "app": "api-service"
+            }
+          },
+          "spec": {
+            "type": "ClusterIP",
+            "selector": {
+              "app": "api-service"
+            },
+            "ports": [
+              {
+                "port": 4000,
+                "targetPort": 4000
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Mongo and mongo express app",
+      "services": [
+        {
+          "provider": "kubernetes",
+          "type": "deployment",
+          "id": "mongo-deploy",
+          "metadata": {
+            "name": "mongo-deployment",
+            "labels": {
+              "app": "mongodb"
+            }
+          },
+          "spec": {
+            "replicas": 1,
+            "selector": {
+              "matchLabels": {
+                "app": "mongodb"
+              }
+            },
+            "template": {
+              "metadata": {
+                "labels": {
+                  "app": "mongodb"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "name": "mongodb",
+                    "image": "mongo:latest",
+                    "ports": [
+                      {
+                        "containerPort": 27017
+                      }
+                    ],
+                    "env": [
+                      {
+                        "name": "MONGO_INITDB_ROOT_USERNAME",
+                        "valueFrom": {
+                          "secretKeyRef": {
+                            "name": "database-credentials",
+                            "key": "username"
+                          }
+                        }
+                      },
+                      {
+                        "name": "MONGO_INITDB_ROOT_PASSWORD",
+                        "valueFrom": {
+                          "secretKeyRef": {
+                            "name": "database-credentials",
+                            "key": "password"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "provider": "kubernetes",
+          "type": "deployment",
+          "id": "mongo-express-deploy",
+          "metadata": {
+            "name": "mongo-express-deployment",
+            "labels": {
+              "app": "mongo-express"
+            }
+          },
+          "spec": {
+            "replicas": 1,
+            "selector": {
+              "matchLabels": {
+                "app": "mongo-express"
+              }
+            },
+            "template": {
+              "metadata": {
+                "labels": {
+                  "app": "mongo-express"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "name": "mongo-express",
+                    "image": "mongo-express",
+                    "ports": [
+                      {
+                        "containerPort": 8081
+                      }
+                    ],
+                    "env": [
+                      {
+                        "name": "ME_CONFIG_MONGODB_SERVER",
+                        "valueFrom": {
+                          "configMapKeyRef": {
+                            "name": "mongo-express-config",
+                            "key": "database_url"
+                          }
+                        }
+                      },
+                      {
+                        "name": "ME_CONFIG_MONGODB_URL",
+                        "valueFrom": {
+                          "configMapKeyRef": {
+                            "name": "mongo-express-config",
+                            "key": "database_url"
+                          }
+                        }
+                      },
+                      {
+                        "name": "ME_CONFIG_MONGODB_ADMINUSERNAME",
+                        "valueFrom": {
+                          "secretKeyRef": {
+                            "name": "database-credentials",
+                            "key": "username"
+                          }
+                        }
+                      },
+                      {
+                        "name": "ME_CONFIG_MONGODB_ADMINPASSWORD",
+                        "valueFrom": {
+                          "secretKeyRef": {
+                            "name": "database-credentials",
+                            "key": "password"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "provider": "kubernetes",
+          "type": "secret",
+          "id": "my-db-credentials",
+          "metadata": {
+            "name": "database-credentials",
+            "labels": {
+              "app": "my-app",
+              "tier": "backend"
+            }
+          },
+          "secret_type": "Opaque",
+          "data": {
+            "username": "dXNlcm5hbWU=",
+            "password": "cGFzc3dvcmQ="
+          }
+        },
+        {
+          "provider": "kubernetes",
+          "type": "config_map",
+          "id": "mongo-express-config",
+          "metadata": {
+            "name": "mongo-express-config",
+            "labels": {
+              "app": "mongo-express"
+            }
+          },
+          "data": {
+            "database_url": "mongo-service"
+          }
+        },
+        {
+          "provider": "kubernetes",
+          "type": "service",
+          "id": "mongo-service",
+          "metadata": {
+            "name": "mongo-service",
+            "labels": {
+              "app": "mongodb"
+            }
+          },
+          "spec": {
+            "selector": {
+              "app": "mongodb"
+            },
+            "ports": [
+              {
+                "protocol": "TCP",
+                "port": "27017",
+                "targetPort": "27017"
+              }
+            ]
+          }
+        },
+        {
+          "provider": "kubernetes",
+          "type": "service",
+          "id": "mongo-express-service",
+          "metadata": {
+            "name": "mongo-express-service",
+            "labels": {
+              "app": "mongo-express"
+            }
+          },
+          "spec": {
+            "selector": {
+              "app": "mongo-express"
+            },
+            "type": "ClusterIP",
+            "ports": [
+              {
+                "protocol": "TCP",
+                "port": "8081",
+                "targetPort": "8081"
+              }
+            ]
+          }
+        },
+        {
+          "provider": "kubernetes",
+          "type": "ingress",
+          "id": "mongo-express-ingress",
+          "metadata": {
+            "name": "mongo-express-ingress",
+            "annotations": {
+              "nginx.ingress.kubernetes.io/rewrite-target": "/",
+              "kubernetes.io/ingress.class": "nginx"
+            }
+          },
+          "spec": {
+            "rules": [
+              {
+                "host": "mongo-express.com",
+                "http": {
+                  "paths": [
+                    {
+                      "path": "/",
+                      "pathType": "Prefix",
+                      "backend": {
+                        "service": {
+                          "name": "mongo-express-service",
+                          "port": "8081"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

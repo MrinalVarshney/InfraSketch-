@@ -1,0 +1,170 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Kubernetes Ingress Validation Schema",
+    "description": "Validates a Kubernetes Ingress definition with TLS and path rules",
+    "type": "object",
+    "required": ["provider", "type", "id", "metadata", "spec"],
+    "properties": {
+      "provider": {
+        "type": "string",
+        "const": "kubernetes"
+      },
+      "type": {
+        "type": "string",
+        "const": "ingress"
+      },
+      "id": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$"
+      },
+      "metadata": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$",
+            "maxLength": 63
+          },
+          "annotations": {
+            "type": "object",
+            "patternProperties": {
+              "^[a-z0-9./-]+$": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "spec": {
+        "type": "object",
+        "required": ["rules"],
+        "properties": {
+          "ingressClassName": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$"
+          },
+          "tls": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["hosts"],
+              "properties": {
+                "hosts": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "format": "hostname"
+                  },
+                  "minItems": 1
+                },
+                "secretName": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9-]+$"
+                }
+              }
+            }
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["host"],
+              "properties": {
+                "host": {
+                  "type": "string",
+                  "format": "hostname"
+                },
+                "http": {
+                  "type": "object",
+                  "required": ["paths"],
+                  "properties": {
+                    "paths": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": ["path", "backend"],
+                        "properties": {
+                          "path": {
+                            "type": "string",
+                            "pattern": "^/.*$"
+                          },
+                          "pathType": {
+                            "type": "string",
+                            "enum": ["Prefix", "Exact", "ImplementationSpecific"]
+                          },
+                          "backend": {
+                            "type": "object",
+                            "required": ["service"],
+                            "properties": {
+                              "service": {
+                                "type": "object",
+                                "required": ["name"],
+                                "properties": {
+                                  "name": {
+                                    "type": "string",
+                                    "pattern": "^[a-z0-9-]+$"
+                                  },
+                                  "port": {
+                                    "type": "object",
+                                    "required": ["number"],
+                                    "properties": {
+                                      "number": {
+                                        "type": "integer",
+                                        "minimum": 1,
+                                        "maximum": 65535
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "minItems": 1
+          }
+        }
+      }
+    },
+    "if": {
+      "properties": {
+        "metadata": {
+          "properties": {
+            "annotations": {
+              "properties": {
+                "kubernetes.io/ingress.class": {
+                  "const": "nginx"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "then": {
+      "properties": {
+        "metadata": {
+          "properties": {
+            "annotations": {
+              "required": ["nginx.ingress.kubernetes.io/rewrite-target"]
+            }
+          }
+        }
+      }
+    },
+    "errorMessages": {
+      "properties": {
+        "metadata.name": "Name must be lowercase alphanumeric with hyphens (e.g., 'my-ingress')",
+        "spec.rules[0].http.paths[0].path": "Path must start with '/' (e.g., '/api')",
+        "spec.tls[0].hosts[0]": "Must be a valid hostname (e.g., 'example.com')"
+      }
+    }
+  }
+  

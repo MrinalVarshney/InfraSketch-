@@ -1,0 +1,83 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+test/
+
+# C extensions (for Linux, macOS)
+*.so
+
+# Distribution / packaging
+.eggs/
+dist/
+build/
+sdist/
+*.egg-info/
+*.whl
+pip-log.txt
+pip-delete-this.txt
+
+# Virtual environment
+venv/
+myenv/
+.venv/
+env/
+envs/
+ENV/
+virtualenv/
+__pypackages__/
+
+# PyInstaller
+*.spec
+dist/
+build/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# MyPy cache
+.mypy_cache/
+
+# Other Python-specific files
+*.log
+*.pot
+
+# OS or Editor related files (adjust as needed)
+.DS_Store
+Thumbs.db
+.idea/
+.project
+.pydevproject.pth
+*.swp
+*.swo
+*.vi
+*.vscode/
+
+# Terraform related (if applicable and you don't want to track state locally)
+.terraform/
+terraform.tfstate
+terraform.tfstate.*
+
+# Sensitive information (adjust as needed)
+*.key
+*.pem
+*.crt
+*.password
+config.ini  # If it contains sensitive data
+secrets.json # If it contains sensitive data
+.env        # If you use dotenv
+
+# Temporary files
+*~
+\#*\#
+*.bak
+*.tmp
+
+# Logs
+*.log
+
+# Optional: Coverage data
+.coverage
+coverage.xml
+.pytest_cache/

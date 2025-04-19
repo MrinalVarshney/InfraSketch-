@@ -1,0 +1,281 @@
+{
+  "connected_services": [
+    {
+      "name": "test",
+      "services": [
+        {
+          "id": "kubernetes-kubernetes-1",
+          "type": "deployment",
+          "provider": "kubernetes",
+          "metadata": {
+            "name": "mongo-deployment",
+            "labels": {
+              "app": "mongodb"
+            }
+          },
+          "spec": {
+            "replicas": 2,
+            "selector": {
+              "matchLabels": {
+                "app": "mongodb"
+              }
+            },
+            "template": {
+              "metadata": {
+                "labels": {
+                  "app": "mongodb"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "name": "mongodb",
+                    "image": "mongo:latest",
+                    "env": [
+                      {
+                        "name": "MONGO_INITDB_ROOT_USERNAME",
+                        "valueFrom": {
+                          "secretKeyRef": {
+                            "name": "db-credentials",
+                            "key": "username"
+                          }
+                        }
+                      },
+                      {
+                        "name": "MONGO_INITDB_ROOT_PASSWORD",
+                        "valueFrom": {
+                          "secretKeyRef": {
+                            "name": "db-credentials",
+                            "key": "password"
+                          }
+                        }
+                      }
+                    ],
+                    "ports": [
+                      {
+                        "containerPort": 27017
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": "kubernetes-network-2",
+          "type": "service",
+          "provider": "kubernetes",
+          "metadata": {
+            "name": "mongo-service",
+            "labels": {},
+            "annotations": {}
+          },
+          "spec": {
+            "type": "ClusterIP",
+            "selector": {
+              "app": "mongodb"
+            },
+            "ports": [
+              {
+                "port": 27017,
+                "name": "http",
+                "targetPort": 27017
+              }
+            ],
+            "clusterIP": "",
+            "externalIPs": []
+          }
+        },
+        {
+          "id": "kubernetes-secret-3",
+          "type": "secret",
+          "provider": "kubernetes",
+          "metadata": {
+            "name": "db-credentials",
+            "labels": {
+              "app": "my-db"
+            },
+            "annotations": {}
+          },
+          "secret_type": "Opaque",
+          "data": {
+            "username": "dXNlcm5hbWU=",
+            "password": "cGFzc3dvcmQ="
+          },
+          "spec": {
+            "selector": {
+              "app": "mongo-express"
+            }
+          }
+        },
+        {
+          "id": "kubernetes-kubernetes-4",
+          "type": "deployment",
+          "provider": "kubernetes",
+          "metadata": {
+            "name": "mongo-express-deployment",
+            "labels": {
+              "app": "mongo-express"
+            }
+          },
+          "spec": {
+            "replicas": 2,
+            "selector": {
+              "matchLabels": {
+                "app": "mongo-express"
+              }
+            },
+            "template": {
+              "metadata": {
+                "labels": {
+                  "app": "mongo-express"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "name": "mongo-express",
+                    "image": "mongo-express",
+                    "env": [
+                      {
+                        "name": "ME_CONFIG_MONGODB_ADMINUSERNAME",
+                        "valueFrom": {
+                          "secretKeyRef": {
+                            "name": "db-credentials",
+                            "key": "username"
+                          }
+                        }
+                      },
+                      {
+                        "name": "ME_CONFIG_MONGODB_ADMINPASSWORD",
+                        "valueFrom": {
+                          "secretKeyRef": {
+                            "name": "db-credentials",
+                            "key": "password"
+                          }
+                        }
+                      },
+                      {
+                        "name": "ME_CONFIG_MONGODB_SERVER",
+                        "valueFrom": {
+                          "configMapKeyRef": {
+                            "name": "mongo-express-config",
+                            "key": "db_url"
+                          }
+                        }
+                      },
+                      {
+                        "name": "ME_CONFIG_MONGODB_URL",
+                        "valueFrom": {
+                          "configMapKeyRef": {
+                            "name": "mongo-express-config",
+                            "key": "db_url"
+                          }
+                        }
+                      }
+                    ],
+                    "ports": [
+                      {
+                        "containerPort": 8081
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": "kubernetes-network-5",
+          "type": "service",
+          "provider": "kubernetes",
+          "metadata": {
+            "name": "mongo-express",
+            "labels": {},
+            "annotations": {}
+          },
+          "spec": {
+            "type": "ClusterIP",
+            "selector": {
+              "app": "mongo-express"
+            },
+            "ports": [
+              {
+                "port": 8081,
+                "name": "http",
+                "targetPort": 8081
+              }
+            ],
+            "clusterIP": "",
+            "externalIPs": []
+          }
+        },
+        {
+          "id": "kubernetes-storage-6",
+          "type": "config_map",
+          "provider": "kubernetes",
+          "metadata": {
+            "name": "mongo-express-config",
+            "labels": {
+              "app": "mongo-express"
+            },
+            "annotations": {}
+          },
+          "data": {
+            "db_url": "mongo-service"
+          },
+          "spec": {
+            "selector": {
+              "app": "mongo-express"
+            }
+          }
+        },
+        {
+          "id": "",
+          "type": "ingress",
+          "provider": "kubernetes",
+          "metadata": {
+            "name": "my-ingress",
+            "annotations": {
+              "kubernetes": {
+                "io/ingress": {
+                  "class": "nginx"
+                }
+              },
+              "nginx": {
+                "ingress": {
+                  "kubernetes": {
+                    "io/rewrite-target": "/"
+                  }
+                }
+              }
+            }
+          },
+          "spec": {
+            "rules": [
+              {
+                "http": {
+                  "paths": [
+                    {
+                      "path": "/",
+                      "pathType": "Prefix",
+                      "backend": {
+                        "service": {
+                          "name": "mongo-express",
+                          "port": 8081
+                        }
+                      }
+                    }
+                  ]
+                },
+                "host": "mongo.com"
+              }
+            ],
+            "tls": []
+          }
+        }
+      ]
+    }
+  ]
+}

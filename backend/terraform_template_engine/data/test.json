@@ -1,0 +1,146 @@
+{
+  "connected_services": [
+    {
+      "name": "test",
+      "services": [
+        {
+          "id": "aws-network-1",
+          "provider": "aws",
+          "type": "vpc",
+          "name": "my-vpc",
+          "cidr_block": "10.0.0.0/16",
+          "enable_dns_support": true,
+          "enable_dns_hostname": true,
+          "tags": {
+            "ws": "sss"
+          }
+        },
+        {
+          "id": "aws-Subnet-2",
+          "provider": "aws",
+          "type": "subnet",
+          "refs": {
+            "vpc": "aws-network-1"
+          },
+          "name": "public-subnet",
+          "cidr_block": "10.0.0.1/24",
+          "availability_zone": "ap-south-1a",
+          "tags": {
+            "type": "public"
+          },
+          "public": true,
+          "map_public_ip_on_launch": true
+        },
+        {
+          "id": "aws-compute-3",
+          "provider": "aws",
+          "type": "ec2_instance",
+          "name": "web-server",
+          "ami": "ami-0a313d6098716f372",
+          "instance_type": "t2.micro",
+          "tags": {
+            "type": "web-server"
+          },
+          "refs": {
+            "vpc": "aws-network-1",
+            "subnet": "aws-Subnet-2",
+            "securityGroup": "aws-SecurityGroup-6"
+          }
+        },
+        {
+          "id": "aws-InternetGateway-4",
+          "provider": "aws",
+          "type": "internet_gateway",
+          "refs": {
+            "vpc": "aws-network-1"
+          },
+          "name": "igw-main",
+          "vpcId": ""
+        },
+        {
+          "id": "aws-RouteTable-5",
+          "provider": "aws",
+          "type": "route_table",
+          "name": "public-route-table",
+          "tags": {
+            "type": "public"
+          },
+          "refs": {
+            "vpc": "aws-network-1",
+            "internet_gateway": "aws-Subnet-2"
+          },
+          "routes": [
+            {
+              "cidr_block": "0.0.0.0/0",
+              "refs": {
+                "internet_gateway": "aws-InternetGateway-4"
+              },
+              "selectedGatewayId": "aws-InternetGateway-4"
+            }
+          ]
+        },
+        {
+          "id": "aws-elastic-7",
+          "provider": "aws",
+          "name": "myeip",
+          "domain": "vpc",
+          "tags": {
+            "Connected to ": "web0-server"
+          },
+          "type": "eip"
+        },
+        {
+          "provider": "aws",
+          "type": "security_group",
+          "id": "aws-SecurityGroup-6",
+          "refs": {
+            "vpc": "aws-network-1"
+          },
+          "description": "Secute http and ssh",
+          "tags": {
+            "sss": "dcc"
+          }
+        },
+        {
+          "provider": "aws",
+          "type": "vpc_security_group_ingress_rule",
+          "id": "43a3xpp7",
+          "refs": {
+            "security_group": "aws-SecurityGroup-6"
+          },
+          "protocol": "tcp",
+          "from_port": 80,
+          "to_port": 80,
+          "cidr_blocks": ["0.0.0.0/0"],
+          "description": "Http acceess"
+        },
+        {
+          "provider": "aws",
+          "type": "vpc_security_group_ingress_rule",
+          "id": "6m62mttc",
+          "refs": {
+            "security_group": "aws-SecurityGroup-6"
+          },
+          "protocol": "tcp",
+          "from_port": 20,
+          "to_port": 22,
+          "cidr_blocks": ["0.0.0.0/0"],
+          "description": "SSH access"
+        },
+        {
+          "provider": "aws",
+          "type": "vpc_security_group_egress_rule",
+          "id": "mh3at38q",
+          "refs": {
+            "security_group": "aws-SecurityGroup-6"
+          },
+          "protocol": "-1",
+          "from_port": 0,
+          "to_port": 0,
+          "cidr_blocks": ["0.0.0.0/0"],
+          "description": "Allow all"
+        }
+      ]
+    }
+  ]
+}

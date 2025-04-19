@@ -1,0 +1,170 @@
+{
+  "connected_services": [
+    {
+      "name": "my-ec2-resources",
+      "services": [
+        {
+          "provider": "aws",
+          "type": "vpc",
+          "id": "vpc-main",
+          "name": "my-test-vpc",
+          "cidr_block": "10.0.0.0/16",
+          "enable_dns_support": true,
+          "enable_dns_hostnames": true,
+          "tags": {
+            "Environment": "test"
+          }
+        },
+        {
+          "provider": "aws",
+          "type": "subnet",
+          "id": "public-subnet-a",
+          "name": "public-subnet-a",
+          "cidr_block": "10.0.1.0/24",
+          "availability_zone": "ap-south-1a",
+          "map_public_ip_on_launch": true,
+          "refs": {
+            "vpc": "vpc-main"
+          },
+          "tags": {
+            "Type": "Public"
+          }
+        },
+        {
+          "provider": "aws",
+          "type": "internet_gateway",
+          "id": "igw-main",
+          "name": "my-test-igw",
+          "refs": {
+            "vpc": "vpc-main"
+          },
+          "tags": {
+            "Environment": "test"
+          }
+        },
+        {
+          "provider": "aws",
+          "type": "security_group",
+          "id": "web-sg",
+          "refs": {
+            "vpc": "vpc-main"
+          },
+          "description": "Allow HTTP and SSH",
+          "tags": {
+            "Name": "web-sg",
+            "Environment": "test"
+          }
+        },
+        {
+          "provider": "aws",
+          "type": "vpc_security_group_ingress_rule",
+          "id": "ingress-http",
+          "refs": {
+            "security_group": "web-sg"
+          },
+          "protocol": "tcp",
+          "from_port": 80,
+          "to_port": 80,
+          "cidr_blocks": ["0.0.0.0/0"],
+          "description": "Allow HTTP inbound"
+        },
+        {
+          "provider": "aws",
+          "type": "vpc_security_group_ingress_rule",
+          "id": "ingress-ssh",
+          "refs": {
+            "security_group": "web-sg"
+          },
+          "protocol": "tcp",
+          "from_port": 22,
+          "to_port": 22,
+          "cidr_blocks": ["0.0.0.0/0"],
+          "description": "Allow SSH inbound from my IP (Replace YOUR_PUBLIC_IP)"
+        },
+        {
+          "provider": "aws",
+          "type": "vpc_security_group_egress_rule",
+          "id": "egress-all",
+          "refs": {
+            "security_group": "web-sg"
+          },
+          "protocol": "-1",
+          "from_port": 0,
+          "to_port": 0,
+          "cidr_blocks": ["0.0.0.0/0"],
+          "description": "Allow all outbound"
+        },
+        {
+          "provider": "aws",
+          "type": "ec2_instance",
+          "id": "web-server-1",
+          "name": "web-server",
+          "ami": "ami-0e35ddab05955cf57",
+          "instance_type": "t2.micro",
+          "refs": {
+            "vpc": "vpc-main",
+            "subnet": "public-subnet-a",
+            "security_group": "web-sg"
+          },
+          "tags": {
+            "Environment": "test"
+          }
+        },
+        {
+          "provider": "aws",
+          "type": "eip",
+          "id": "web-server-eip",
+          "name": "web-server-public-ip",
+          "domain": "vpc",
+          "tags": {
+            "Name": "web-server-eip",
+            "Environment": "test"
+          }
+        },
+        {
+          "provider": "aws",
+          "type": "eip_association",
+          "id": "web-eip-assoc",
+          "refs": {
+            "instance": "web-server-1",
+            "eip": "web-server-eip"
+          },
+          "depends_on": [
+            { "type": "aws_instance", "id": "web-server-1" },
+            { "type": "aws_eip", "id": "web-server-eip" }
+          ]
+        },
+        {
+          "provider": "aws",
+          "type": "route_table",
+          "id": "public-rt",
+          "name": "public-subnet-rt",
+          "refs": {
+            "vpc": "vpc-main"
+          },
+          "tags": {
+            "Environment": "test",
+            "Type": "Public"
+          },
+          "routes": [
+            {
+              "cidr_block": "0.0.0.0/0",
+              "refs": {
+                "internet_gateway": "igw-main"
+              }
+            }
+          ]
+        },
+        {
+          "provider": "aws",
+          "type": "route_table_association",
+          "id": "public-subnet-assoc",
+          "refs": {
+            "route_table": "public-rt",
+            "subnet": "public-subnet-a"
+          }
+        }
+      ]
+    }
+  ]
+}

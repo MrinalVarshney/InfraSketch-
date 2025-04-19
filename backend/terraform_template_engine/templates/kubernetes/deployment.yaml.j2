@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ metadata.name if metadata and metadata.name is defined else "default-name" }}
+  labels:
+    {% if metadata and metadata.labels %}
+    {% for key, value in metadata.labels.items() %}
+    {{ key }}: {{ value }}
+    {% endfor %}
+    {% endif %}
+spec:
+  replicas: {{ spec.replicas if spec and spec.replicas is defined else 1 }}
+  selector:
+    matchLabels:
+      {% if spec and spec.selector and spec.selector.matchLabels %}
+      {% for key, value in spec.selector.matchLabels.items() %}
+      {{ key }}: {{ value }}
+      {% endfor %}
+      {% endif %}
+  template:
+    metadata:
+      labels:
+        {% if spec and spec.template and spec.template.metadata and spec.template.metadata.labels %}
+        {% for key, value in spec.template.metadata.labels.items() %}
+        {{ key }}: {{ value }}
+        {% endfor %}
+        {% endif %}
+    spec:
+      containers:
+        {% if spec and spec.template and spec.template.spec and spec.template.spec.containers %}
+        {% for container in spec.template.spec.containers %}
+        - name: {{ container.name }}
+          image: {{ container.image }}
+          {% if container.ports %}
+          ports:
+            {% for port in container.ports %}
+            - containerPort: {{ port.containerPort }}
+            {% endfor %}
+          {% endif %}
+          {% if container.env %}
+          env:
+            {% for env in container.env %}
+            - name: {{ env.name }}
+              {% if env.value %}
+              value: {{ env.value }}
+              {% elif env.valueFrom %}
+              valueFrom:
+                {% if env.valueFrom.configMapKeyRef %}
+                configMapKeyRef:
+                  name: {{ env.valueFrom.configMapKeyRef.name }}
+                  key: {{ env.valueFrom.configMapKeyRef.key }}
+                {% elif env.valueFrom.secretKeyRef %}
+                secretKeyRef:
+                  name: {{ env.valueFrom.secretKeyRef.name }}
+                  key: {{ env.valueFrom.secretKeyRef.key }}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+        {% endfor %}
+        {% endif %}

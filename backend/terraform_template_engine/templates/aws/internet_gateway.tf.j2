@@ -1,0 +1,12 @@
+resource "aws_internet_gateway" "{{ id.replace('-', '_') }}" {
+  vpc_id = aws_vpc.{{ refs.vpc.replace('-','_') }}.id
+
+  tags = {
+    Name = "{{ name }}"
+    {% if tags %}
+    {% for key, value in tags.items() %}
+    {{ key }} = "{{ value }}"
+    {% endfor %}
+    {% endif %}
+  }
+}

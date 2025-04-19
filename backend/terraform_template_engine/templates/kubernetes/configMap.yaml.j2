@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ metadata.name }}
+  {% if metadata.namespace %}
+  namespace: {{ metadata.namespace }}
+  {% endif %}
+  {% if metadata.labels %}
+  labels:
+    {% for key, value in metadata.labels.items() %}
+    {{ key }}: {{ value }}
+    {% endfor %}
+  {% endif %}
+data:
+  {% for key, value in data.items() %}
+  {{ key }}: {{ value }}
+  {% endfor %}

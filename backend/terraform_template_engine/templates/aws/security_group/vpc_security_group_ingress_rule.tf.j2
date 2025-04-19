@@ -1,0 +1,22 @@
+resource "aws_vpc_security_group_ingress_rule" "{{ id.replace('-', '_') }}_ingress_rule" {
+  security_group_id = aws_security_group.{{ refs.security_group.replace('-', '_') }}.id
+  ip_protocol       = "{{ protocol }}"
+  from_port         = {{ from_port }}
+  to_port           = {{ to_port }}
+  {% if cidr_blocks %}
+  cidr_ipv4         = "{{ cidr_blocks[0] }}"
+  {% endif %}
+  {% if ipv6_cidr_blocks %}
+  cidr_ipv6         = "{{ ipv6_cidr_blocks[0] }}"
+  {% endif %}
+  
+  description       = "{{ description|default('') }}"
+
+  tags = {
+    {% if tags %}
+    {% for key, value in tags.items() %}
+    {{ key }} = "{{ value }}"
+    {% endfor %}
+    {% endif %}
+  }
+}

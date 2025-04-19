@@ -1,0 +1,35 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ metadata.name | default("my-ingress") }}
+  namespace: {{ metadata.namespace | default("default") }}
+  {% if metadata.annotations %}
+  annotations:
+    {% for key, value in metadata.annotations.items() %}
+    {{ key }}: {{ value | tojson }}
+    {% endfor %}
+  {% endif %}
+spec:
+  {% if tls %}
+  tls:
+    - hosts:
+        {% for host in tls.hosts %}
+        - {{ host }}
+        {% endfor %}
+      secretName: {{ tls.secretName | default("tls-secret") }}
+  {% endif %}
+  rules:
+    {% for rule in spec.rules %}
+    - host: {{ rule.host | default("") }}
+      http:
+        paths:
+          {% for path in rule.http.paths %}
+          - path: {{ path.path | default("/") }}
+            pathType: {{ path.pathType | default("Prefix") }}
+            backend:
+              service:
+                name: {{ path.backend.service.name }}
+                port:
+                  number: {{ path.backend.service.port | default(80) }}
+          {% endfor %} 
+    {% endfor %}

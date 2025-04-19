@@ -1,0 +1,61 @@
+resource "aws_lb" "{{ lb_name }}" {
+  name               = "{{ lb_name }}"
+  internal           = {{ internal | default(false) }}
+  load_balancer_type = "{{ lb_type | default('application') }}"
+  security_groups    = {{ security_groups }}
+  subnets            = {{ subnets }}
+
+  tags = {
+    Environment = "{{ environment }}"
+    Project     = "{{ project }}"
+  }
+}
+
+resource "aws_lb_target_group" "{{ target_group_name }}" {
+  name     = "{{ target_group_name }}"
+  port     = {{ target_port }}
+  protocol = "{{ target_protocol | default('HTTP') }}"
+  vpc_id   = "{{ vpc_id }}"
+
+  health_check {
+    healthy_threshold   = {{ healthy_threshold | default(2) }}
+    unhealthy_threshold = {{ unhealthy_threshold | default(2) }}
+    timeout             = {{ timeout | default(5) }}
+    interval            = {{ interval | default(30) }}
+    path                = "{{ path | default('/') }}"
+    matcher             = "{{ matcher | default('200-399') }}"
+  }
+
+  tags = {
+    Environment = "{{ environment }}"
+    Project     = "{{ project }}"
+  }
+}
+
+{% for listener in listeners %}
+resource "aws_lb_listener" "{{ listener.name }}" {
+  load_balancer_arn = aws_lb.{{ lb_name }}.arn
+  port              = {{ listener.port }}
+  protocol          = "{{ listener.protocol | default('HTTP') }}"
+
+  default_action {
+    type = "{{ listener.action_type | default('forward') }}"
+
+    {% if listener.action_type == 'forward' %}
+    target_group_arn = aws_lb_target_group.{{ listener.target_group }}.arn
+    {% elif listener.action_type == 'redirect' %}
+    redirect {
+      port        = "{{ listener.redirect_port | default('443') }}"
+      protocol    = "{{ listener.redirect_protocol | default('HTTPS') }}"
+      status_code = "{{ listener.redirect_status | default('HTTP_301') }}"
+    }
+    {% elif listener.action_type == 'fixed-response' %}
+    fixed_response {
+      content_type = "{{ listener.response_content_type | default('text/plain') }}"
+      message_body = "{{ listener.response_body | default('Service unavailable') }}"
+      status_code  = "{{ listener.response_status_code | default('503') }}"
+    }
+    {% endif %}
+  }
+}
+{% endfor %}

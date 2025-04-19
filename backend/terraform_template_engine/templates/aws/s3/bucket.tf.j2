@@ -1,0 +1,30 @@
+resource "aws_s3_bucket" "{{ id.replace('-', '_') }}" {
+  bucket = "{{ bucket }}"
+
+  tags = {
+    Name = "{{ name|default(bucket) }}"
+    {% if tags %}
+    {% for key, value in tags.items() %}
+    {{ key }} = "{{ value }}"
+    {% endfor %}
+    {% endif %}
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+{% if acl %}
+resource "aws_s3_bucket_acl" "{{ id.replace('-', '_') }}_acl" {
+  bucket = aws_s3_bucket.{{ id.replace('-', '_') }}.id
+  acl    = "{{ acl }}"
+}
+{% endif %}
+
+{% if versioning.enabled %}
+resource "aws_s3_bucket_versioning" "{{ id.replace('-', '_') }}_versioning" {
+  bucket = aws_s3_bucket.{{ id.replace('-', '_') }}.id
+  status = "Enabled"
+}
+{% endif %}

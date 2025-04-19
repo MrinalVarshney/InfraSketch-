@@ -1,0 +1,81 @@
+resource "aws_ecs_cluster" "{{ ecs_cluster_name }}" {
+  name = "{{ ecs_cluster_name }}"
+}
+
+resource "aws_ecs_task_definition" "{{ task_definition_name }}" {
+  family                   = "{{ task_definition_name }}"
+  network_mode             = "{{ network_mode | default('awsvpc') }}"
+  requires_compatibilities = ["FARGATE"]
+
+  container_definitions = jsonencode([
+    {% for container in containers %}
+    {
+      name      = "{{ container.name }}"
+      image     = "{{ container.image }}"
+      cpu       = {{ container.cpu }}
+      memory    = {{ container.memory }}
+      essential = {{ container.essential }}
+      portMappings = [
+        {% for port in container.port_mappings %}
+        {
+          containerPort = {{ port.container_port }},
+          hostPort      = {{ port.host_port | default(port.container_port) }},
+          protocol      = "{{ port.protocol | default('tcp') }}"
+        }
+        {% endfor %}
+      ]
+      {% if container.log_configuration %}
+      logConfiguration = {
+        logDriver = "{{ container.log_configuration.log_driver }}"
+        options = {
+          {% for key, value in container.log_configuration.options.items() %}
+          "{{ key }}" = "{{ value }}"
+          {% if not loop.last %}, {% endif %}
+          {% endfor %}
+        }
+      }
+      {% endif %}
+    }
+    {% if not loop.last %}, {% endif %}
+    {% endfor %}
+  ])
+}
+
+resource "aws_ecs_service" "{{ ecs_service_name }}" {
+  name            = "{{ ecs_service_name }}"
+  cluster         = aws_ecs_cluster.{{ ecs_cluster_name }}.id
+  task_definition = aws_ecs_task_definition.{{ task_definition_name }}.arn
+  desired_count   = {{ desired_count | default(1) }}
+
+  launch_type = "FARGATE"
+
+  network_configuration {
+    subnets          = {{ subnets }}
+    security_groups = {{ security_groups }}
+    assign_public_ip = {{ assign_public_ip | default(true) }}
+  }
+
+  load_balancer {
+    target_group_arn = "{{ target_group_arn }}"
+    container_name   = "{{ container_name }}"
+    container_port   = {{ container_port }}
+  }
+
+  {% if log_configuration %}
+  log_configuration {
+    logDriver = "{{ log_configuration.log_driver }}"
+    options = {
+      {% for key, value in log_configuration.options.items() %}
+      "{{ key }}" = "{{ value }}"
+      {% if not loop.last %}, {% endif %}
+      {% endfor %}
+    }
+  }
+  {% endif %}
+
+  tags = {
+    Name        = "{{ ecs_service_name }}"
+    Environment = "{{ environment }}"
+    Project     = "{{ project }}"
+  }
+}

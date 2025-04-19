@@ -1,0 +1,110 @@
+{
+  "connected_services": [
+    {
+      "name": "my-simple-network",
+      "services": [
+        {
+          "provider": "aws",
+          "type": "vpc",
+          "id": "vpc-main",
+          "name": "my-test-vpc",
+          "cidr_block": "10.0.0.0/16",
+          "enable_dns_support": true,
+          "enable_dns_hostnames": true
+        },
+        {
+          "provider": "aws",
+          "type": "subnet",
+          "id": "private-subnet-b",
+          "name": "private-subnet-b",
+          "cidr_block": "10.0.2.0/24",
+          "availability_zone": "ap-south-1b",
+          "map_public_ip_on_launch": false,
+          "tags": { "Type": "Private" },
+          "refs": { "vpc": "vpc-main" }
+        },
+        {
+          "provider": "aws",
+          "type": "internet_gateway",
+          "id": "igw-main",
+          "name": "my-test-igw",
+          "refs": { "vpc": "vpc-main" },
+          "tags": { "Environment": "test" }
+        },
+        {
+          "provider": "aws",
+          "type": "eip",
+          "id": "nat-eip",
+          "name": "nat-gateway-eip",
+          "domain": "vpc",
+          "tags": { "Environment": "dev", "Purpose": "NAT Gateway" }
+        },
+        {
+          "provider": "aws",
+          "type": "nat_gateway",
+          "id": "nat-main",
+          "name": "my-nat-gateway",
+          "refs": { "subnet": "private-subnet-b", "eip": "nat-eip" },
+          "tags": { "Environment": "dev" },
+          "vpc_ref": "vpc-main"
+        },
+        {
+          "provider": "aws",
+          "type": "route_table",
+          "id": "public-rt",
+          "name": "public-subnet-rt",
+          "refs": { "vpc": "vpc-main" },
+          "tags": { "Environment": "test", "Type": "Public" },
+          "routes": [
+            {
+              "cidr_block": "0.0.0.0/0",
+              "refs": { "internet_gateway": "igw-main" }
+            }
+          ]
+        },
+        {
+          "provider": "aws",
+          "type": "route_table",
+          "id": "private-rt",
+          "name": "private-subnet-rt",
+          "refs": { "vpc": "vpc-main" },
+          "tags": { "Environment": "test", "Type": "Private" },
+          "routes": [
+            { "cidr_block": "0.0.0.0/0", "refs": { "nat_gateway": "nat-main" } }
+          ]
+        },
+        {
+          "provider": "aws",
+          "type": "route_table_association",
+          "id": "public-subnet-rt-assoc",
+          "refs": { "subnet": "public-subnet-a", "route_table": "public-rt" }
+        },
+        {
+          "provider": "aws",
+          "type": "route_table_association",
+          "id": "private-subnet-rt-assoc",
+          "refs": { "subnet": "private-subnet-b", "route_table": "private-rt" }
+        }
+      ]
+    },
+    {
+      "name": "my-s3-bucket",
+      "services": [
+        {
+          "provider": "aws",
+          "type": "s3_bucket",
+          "id": "my-s3-bucket-1",
+          "bucket": "user-defined-bucket-name",
+          "region": "ap-south-1",
+          "acl": "private",
+          "versioning": {
+            "enabled": false
+          },
+          "tags": {
+            "Name": "my-s3-bucket"
+          }
+        }
+      ]
+    }
+  ]
+}
