@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ metadata.name }}
+  {% if metadata.labels %}
+  labels:
+    {% for key, value in metadata.labels.items() %}
+    {{ key }}: {{ value }}
+    {% endfor %}
+  {% endif %}
+spec:
+  {%if spec.type %}
+  type: {{ spec.type }}
+  {% endif %}
+  selector:
+    {% for key, value in spec.selector.items() %}
+    {{ key }}: {{ value }}
+    {% endfor %}
+  ports:
+    {% for port in spec.ports %}
+    - protocol: TCP
+      port: {{ port.port }}
+      targetPort: {{ port.targetPort }}
+      {% if port.nodePort is defined %}
+      nodePort: {{ port.nodePort }}
+      {% endif %}
+    {% endfor %}

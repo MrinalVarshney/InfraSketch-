@@ -1,0 +1,27 @@
+resource "aws_eip" "{{ id.replace('-', '_') }}" {
+  {% if domain %}
+  domain = "{{ domain }}"
+  {% endif %}
+
+
+  {% if public_ip %}
+  public_ip = "{{ public_ip }}"
+  {% endif %}
+
+  {% if customer_owned_ipv4_pool %}
+  customer_owned_ipv4_pool = "{{ customer_owned_ipv4_pool }}"
+  {% endif %}
+
+  tags = {
+    Name = "{{ name }}"
+    {% if tags %}
+    {% for key, value in tags.items() %}
+    {{ key }} = "{{ value }}"
+    {% endfor %}
+    {% endif %}
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}

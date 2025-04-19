@@ -1,0 +1,20 @@
+resource "aws_subnet" "{{ id.replace('-', '_') }}" {
+  vpc_id            = aws_vpc.{{refs.vpc.replace('-','_')}}.id
+  cidr_block        = "{{ cidr_block }}"
+  availability_zone = "{{ availability_zone }}"
+
+  map_public_ip_on_launch = {{ map_public_ip_on_launch | default(false) | lower }}
+
+  tags = {
+    Name = "{{ name }}"
+    {% if tags %}
+    {% for key, value in tags.items() %}
+    {{ key }} = "{{ value }}"
+    {% endfor %}
+    {% endif %}
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  } 
+}

@@ -1,0 +1,15 @@
+resource "aws_vpc" "{{ id.replace('-', '_') }}" {
+  cidr_block                       = "{{ cidr_block }}"
+  enable_dns_support               = {{ enable_dns_support | default(true) | lower }}
+  enable_dns_hostnames           = {{ enable_dns_hostnames | default(true) | lower }}
+  instance_tenancy                 = "{{ instance_tenancy | default('default') }}"
+
+  tags = {
+    Name = "{{ name }}"
+    {% if tags %}
+    {% for key, value in tags.items() %}
+    {{ key }} = "{{ value }}"
+    {% endfor %}
+    {% endif %}
+  }
+}

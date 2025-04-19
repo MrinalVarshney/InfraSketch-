@@ -1,0 +1,60 @@
+{
+  "networks": [
+    {
+      "provider": "docker",
+      "name": "my-app-network",
+      "driver": "bridge"
+    },
+    {
+      "provider": "aws",
+      "type": "vpc",
+      "name": "my_vpc",
+      "cidr_block": "10.0.0.0/16",
+      "tags": { "Environment": "dev" }
+    }
+  ],
+  "services": [
+    {
+      "provider": "docker",
+      "type": "application-server",
+      "name": "my-app",
+      "image": "nginx:latest",
+      "ports": [{ "internal": 80, "external": 8080 }],
+      "networks_advanced": [{ "name": "my-app-network" }],
+      "env": {
+        "NODE_ENV": "production",
+        "API_URL": "http://localhost:8080/api",
+        "DB_HOST": "mydb",
+        "DB_PORT": "5432",
+        "DB_USER": "appuser",
+        "DB_PASSWORD": "securepassword",
+        "DB_NAME": "mydatabase"
+      },
+      "depends_on": ["mydb"]
+    },
+    {
+      "provider": "docker",
+      "type": "database",
+      "name": "mydb",
+      "image": "postgres:14-alpine",
+      "ports": [{ "internal": 5432, "external": 5432 }],
+      "env": {
+        "POSTGRES_USER": "appuser",
+        "POSTGRES_PASSWORD": "securepassword",
+        "POSTGRES_DB": "mydatabase"
+      },
+      "networks_advanced": [{ "name": "my-app-network" }]
+    },
+    {
+      "provider": "aws",
+      "type": "ec2",
+      "name": "my-ec2-instance",
+      "ami": "ami-0c55b159cbfafe1f0",
+      "instance_type": "t2.micro",
+      "region": "ap-south-1",
+      "tags": {
+        "Name": "MyEC2Instance"
+      }
+    }
+  ]
+}

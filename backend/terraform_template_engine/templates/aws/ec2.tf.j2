@@ -1,0 +1,17 @@
+resource "aws_instance" "{{ id.replace('-', '_') }}" {
+    ami  = "{{ ami }}"
+    instance_type = "{{ instance_type }}"
+
+    {%if refs.security_group %}
+    vpc_security_group_ids = [aws_security_group.{{ refs.security_group.replace('-', '_') }}.id]
+    {%endif%}
+
+    {%if refs.subnet %}
+    subnet_id = aws_subnet.{{ refs.subnet.replace('-', '_') }}.id
+    {%endif%}
+
+
+    tags = {
+        Name = "{{ name }}"
+    }
+}

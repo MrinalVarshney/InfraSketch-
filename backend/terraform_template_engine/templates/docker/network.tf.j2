@@ -1,0 +1,6 @@
+{% if network %}
+resource "docker_network" "{{ name }}" {
+  name   = "{{ name }}"
+  driver = "{{ driver | default('bridge') }}"
+}
+{% endif %}

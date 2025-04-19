@@ -1,0 +1,58 @@
+resource "aws_route_table" "{{ id.replace('-', '_') }}" {
+  vpc_id = aws_vpc.{{ refs.vpc.replace('-', '_') }}.id
+
+  {% if propagating_vgws %}
+  propagating_vgws = [
+    {% for vgw in propagating_vgws %}
+    aws_vpn_gateway.{{ vgw.replace('-', '_') }}.id,
+    {% endfor %}
+  ]
+  {% endif %}
+
+  {% if routes %}
+  {% for route in routes %}
+  route {
+    {% if route.cidr_block %}
+    cidr_block = "{{ route.cidr_block }}"
+    {% endif %}
+
+    {% if route.refs.internet_gateway %}
+    gateway_id = aws_internet_gateway.{{ route.refs.internet_gateway.replace('-', '_') }}.id
+
+    {% elif route.refs.instance %}
+    instance_id = aws_instance.{{ route.refs.instance.replace('-', '_') }}.id
+
+    {% elif route.refs.network_interface %}
+    network_interface_id = aws_network_interface.{{ route.refs.network_interface.replace('-', '_') }}.id
+
+    {% elif route.refs.nat_gateway %}
+    nat_gateway_id = aws_nat_gateway.{{ route.refs.nat_gateway.replace('-', '_') }}.id
+
+    {% elif route.refs.transit_gateway %}
+    transit_gateway_id = aws_transit_gateway.{{ route.refs.transit_gateway.replace('-', '_') }}.id
+
+    {% elif route.refs.vpc_peering_connection %}
+    vpc_peering_connection_id = aws_vpc_peering_connection.{{ route.refs.vpc_peering_connection.replace('-', '_') }}.id
+
+    {% elif route.refs.carrier_gateway %}
+    carrier_gateway_id = aws_carrier_gateway.{{ route.refs.carrier_gateway.replace('-', '_') }}.id
+
+    {% elif route.refs.local_gateway_route_table %}
+    local_gateway_route_table_id = "{{ route.refs.local_gateway_route_table }}"
+
+    {% elif route.refs.egress_only_gateway %}
+    egress_only_gateway_id = aws_egress_only_internet_gateway.{{ route.refs.egress_only_gateway.replace('-', '_') }}.id
+    {% endif %}
+  }
+  {% endfor %}
+  {% endif %}
+
+  tags = {
+    Name = "{{ name }}"
+    {% if tags %}
+    {% for key, value in tags.items() %}
+    {{ key }} = "{{ value }}"
+    {% endfor %}
+    {% endif %}
+  }
+}

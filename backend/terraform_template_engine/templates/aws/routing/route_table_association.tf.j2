@@ -1,0 +1,4 @@
+resource "aws_route_table_association" "{{ id.replace('-', '_') }}" {
+  subnet_id      = aws_subnet.{{ refs.subnet.replace('-', '_') }}.id
+  route_table_id = aws_route_table.{{ refs.route_table.replace('-', '_') }}.id
+}

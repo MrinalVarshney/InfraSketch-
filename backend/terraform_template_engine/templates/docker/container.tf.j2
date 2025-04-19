@@ -1,0 +1,30 @@
+resource "docker_container" "{{  name.replace('-', '_') }}" {
+  name     = "{{  name }}"
+  image    = "{{  image }}"
+
+  {% if  ports %}
+  {% for port in  ports %}
+  ports {
+    internal = {{ port.internal }}
+    external = {{ port.external }}
+  }
+  {% endfor %}
+  {% endif %}
+
+  {% if  networks_advanced %}
+  networks_advanced {
+    {% for network in  networks_advanced %}
+    name = "{{ network.name }}"
+    {% endfor %}
+  }
+  {% endif %}
+
+  {% if  env %}
+  env = [
+    {% for key, value in  env.items() %}
+    "{{ key }}={{ value }}",
+    {% endfor %}
+  ]
+  {% endif %}
+  
+}
