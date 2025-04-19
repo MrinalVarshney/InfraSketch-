@@ -1,0 +1,147 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Kubernetes PersistentVolume Validation Schema",
+    "description": "Validates PV/PVC definitions with storage class and access mode enforcement",
+    "definitions": {
+      "capacity": {
+        "type": "object",
+        "required": ["storage"],
+        "properties": {
+          "storage": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*(Gi|Mi)$"
+          }
+        }
+      },
+      "accessModes": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": ["ReadWriteOnce", "ReadOnlyMany", "ReadWriteMany"]
+        },
+        "minItems": 1,
+        "uniqueItems": true
+      }
+    },
+    "type": "object",
+    "required": ["provider", "type", "metadata", "spec"],
+    "properties": {
+      "provider": {
+        "type": "string",
+        "const": "kubernetes"
+      },
+      "type": {
+        "type": "string",
+        "enum": ["persistent_volume", "persistent_volume_claim"]
+      },
+      "id": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$"
+      },
+      "metadata": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$",
+            "maxLength": 63
+          },
+          "labels": {
+            "type": "object",
+            "patternProperties": {
+              "^[a-z0-9-]+$": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "spec": {
+        "type": "object",
+        "required": ["capacity", "accessModes"],
+        "properties": {
+          "storageClassName": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$"
+          },
+          "capacity": {
+            "$ref": "#/definitions/capacity"
+          },
+          "accessModes": {
+            "$ref": "#/definitions/accessModes"
+          },
+          "persistentVolumeReclaimPolicy": {
+            "type": "string",
+            "enum": ["Retain", "Delete", "Recycle"]
+          },
+          "volumeMode": {
+            "type": "string",
+            "enum": ["Filesystem", "Block"]
+          },
+          "hostPath": {
+            "type": "object",
+            "required": ["path"],
+            "properties": {
+              "path": {
+                "type": "string",
+                "pattern": "^/"
+              }
+            }
+          },
+          "awsElasticBlockStore": {
+            "type": "object",
+            "required": ["volumeID"],
+            "properties": {
+              "volumeID": {
+                "type": "string",
+                "pattern": "^vol-[a-f0-9]+$"
+              },
+              "fsType": {
+                "type": "string",
+                "enum": ["ext4", "xfs", "ntfs"]
+              }
+            }
+          },
+          "gcePersistentDisk": {
+            "type": "object",
+            "required": ["pdName"],
+            "properties": {
+              "pdName": {
+                "type": "string",
+                "pattern": "^[a-z0-9-]+$"
+              },
+              "fsType": {
+                "type": "string",
+                "enum": ["ext4", "xfs"]
+              }
+            }
+          }
+        }
+      }
+    },
+    "if": {
+      "properties": {
+        "type": { "const": "persistent_volume_claim" }
+      }
+    },
+    "then": {
+      "required": ["spec.volumeName"],
+      "properties": {
+        "spec": {
+          "properties": {
+            "volumeName": {
+              "type": "string",
+              "pattern": "^[a-z0-9-]+$"
+            }
+          }
+        }
+      }
+    },
+    "errorMessages": {
+      "spec.capacity.storage": "Must be like '10Gi' or '100Mi'",
+      "spec.accessModes": "Must be one of: ReadWriteOnce, ReadOnlyMany, ReadWriteMany",
+      "spec.awsElasticBlockStore.volumeID": "Must be an AWS EBS volume ID (vol-XXXXX)"
+    }
+  }
+  
