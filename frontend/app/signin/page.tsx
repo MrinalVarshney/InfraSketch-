@@ -130,7 +130,7 @@ const SignIn = () => {
     ))}
 
         <div className="text-center text-sm">
-          <a href="#" className="text-primary hover:underline">
+          <a href="/forgot-password" className="text-primary hover:underline">
             Forgot password?
           </a>
         </div>
