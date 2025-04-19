@@ -1,0 +1,77 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AWS VPC Validation Schema",
+  "description": "Validates Terraform-style VPC configurations with CIDR and tagging rules",
+  "type": "object",
+  "required": ["provider", "type", "id", "cidr_block"],
+  "properties": {
+    "provider": {
+      "type": "string",
+      "const": "aws"
+    },
+    "type": {
+      "type": "string",
+      "const": "vpc"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "maxLength": 64,
+      "description": "Terraform resource ID (must be unique)"
+    },
+    "name": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9-]+$",
+      "maxLength": 64,
+      "description": "VPC name tag"
+    },
+    "cidr_block": {
+      "type": "string",
+      "format": "cidr",
+      "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)/(1[6-9]|2[0-8])$",
+      "description": "Primary IPv4 CIDR block (/16 to /28)"
+    },
+    "enable_dns_support": {
+      "type": "boolean",
+      "default": true
+    },
+    "enable_dns_hostnames": {
+      "type": "boolean",
+      "default": false
+    },
+    "instance_tenancy": {
+      "type": "string",
+      "enum": ["default", "dedicated"],
+      "default": "default"
+    },
+    "ipv6_cidr_block": {
+      "type": "string",
+      "format": "cidr",
+      "pattern": "^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}/\\d{1,3}$"
+    },
+    "tags": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z0-9 _.:/=+@-]{1,128}$": {
+          "type": "string",
+          "maxLength": 256
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "if": {
+    "properties": {
+      "enable_dns_hostnames": { "const": true }
+    }
+  },
+  "then": {
+    "required": ["enable_dns_support"],
+    "errorMessage": "DNS hostnames require DNS support"
+  },
+  "errorMessages": {
+    "cidr_block": "Must be valid IPv4 CIDR (e.g., 10.0.0.0/16)",
+    "ipv6_cidr_block": "Must be valid IPv6 CIDR (e.g., 2001:db8::/56)",
+    "tags": "Tag keys can contain alphanumerics and _.:/=+@-"
+  }
+}

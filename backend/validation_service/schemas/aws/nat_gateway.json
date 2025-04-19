@@ -1,0 +1,95 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AWS NAT Gateway Configuration",
+  "description": "Schema for validating the JSON structure for AWS NAT Gateway resources with custom error messages.",
+  "type": "object",
+  "properties": {
+    "provider": {
+      "type": "string",
+      "enum": ["aws"],
+      "description": "The cloud provider for this resource.",
+      "$message": {
+        "enum": "Provider must be 'aws'."
+      }
+    },
+    "type": {
+      "type": "string",
+      "enum": ["nat_gateway"],
+      "description": "The type of AWS resource.",
+      "$message": {
+        "enum": "Type must be 'nat_gateway'."
+      }
+    },
+    "id": {
+      "type": "string",
+      "description": "A unique identifier for this NAT Gateway resource within your configuration.",
+      "$message": {
+        "type": "ID must be a string."
+      }
+    },
+    "allocation_id": {
+      "type": "string",
+      "description": "The Allocation ID of the Elastic IP address to associate with the NAT Gateway.",
+      "$message": {
+        "type": "Allocation ID must be a string."
+      }
+    },
+    "subnet_id": {
+      "type": "string",
+      "description": "The ID of the subnet in which to create the NAT Gateway.",
+      "$message": {
+        "type": "Subnet ID must be a string."
+      }
+    },
+    "connectivity_type": {
+      "type": "string",
+      "enum": ["public", "private"],
+      "description": "Connectivity type for the NAT Gateway. Valid values are 'public' or 'private'. Defaults to 'public'.",
+      "$message": {
+        "enum": "Connectivity type must be 'public' or 'private'."
+      }
+    },
+    "private_ip": {
+      "type": ["string", "null"],
+      "description": "Private IP address to assign to the NAT Gateway. If not specified, AWS will automatically assign one. Only applies if `connectivity_type` is 'private'.",
+      "$message": {
+        "type": "Private IP must be a string or null."
+      }
+    },
+    "tags": {
+      "type": "object",
+      "description": "A map of tags to assign to the NAT Gateway.",
+      "$message": {
+        "type": "Tags must be an object."
+      }
+    }
+  },
+  "required": ["provider", "type", "id", "subnet_id"],
+  "dependencies": {
+    "private_ip": {
+      "properties": {
+        "connectivity_type": {
+          "enum": ["private"]
+        }
+      },
+      "$message": {
+        "properties": "Private IP can only be specified if connectivity type is 'private'."
+      }
+    },
+    "allocation_id": {
+      "properties": {
+        "connectivity_type": {
+          "enum": ["public"]
+        }
+      },
+      "$message": {
+        "properties": "Allocation ID is required if connectivity type is 'public'."
+      },
+      "required": ["connectivity_type"]
+    }
+  },
+  "$message": {
+    "required": "The following fields are required: provider, type, id, and subnet_id.",
+    "type": "Root must be an object."
+  }
+}

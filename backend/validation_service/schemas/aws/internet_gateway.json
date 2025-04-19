@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AWS Internet Gateway Validation Schema",
+  "description": "Validates Terraform-style Internet Gateway configurations with VPC attachment rules",
+  "type": "object",
+  "required": ["provider", "type", "id", "refs"],
+  "properties": {
+    "provider": {
+      "type": "string",
+      "const": "aws"
+    },
+    "type": {
+      "type": "string",
+      "const": "internet_gateway"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "maxLength": 64,
+      "description": "Terraform resource ID (must be unique)"
+    },
+    "name": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9-]+$",
+      "maxLength": 64,
+      "description": "IGW name tag"
+    },
+    "refs": {
+      "type": "object",
+      "required": ["vpc"],
+      "properties": {
+        "vpc": {
+          "type": "string",
+          "pattern": "^vpc-|^[a-z0-9-]+$",
+          "description": "Must reference a VPC (AWS ID or Terraform resource name)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "tags": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z0-9 _.:/=+@-]{1,128}$": {
+          "type": "string",
+          "maxLength": 256
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "errorMessages": {
+    "id": "Must be a valid Terraform identifier (lowercase alphanumeric + hyphens)",
+    "refs.vpc": "Must reference a valid VPC resource ID",
+    "tags": "Tag keys can contain alphanumerics and _.:/=+@-"
+  }
+}

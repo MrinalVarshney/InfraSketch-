@@ -1,0 +1,22 @@
+{
+  "name": "validation_service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@tsed/ajv": "^8.7.1",
+    "@types/express": "^5.0.1",
+    "ajv": "^8.17.1",
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "fs": "^0.0.1-security",
+    "os": "^0.1.2",
+    "path": "^0.12.7"
+  }
+}
