@@ -1,0 +1,63 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Kubernetes ConfigMap Validation Schema",
+    "description": "Validates ConfigMap keys and values",
+    "type": "object",
+    "required": ["provider", "type", "metadata", "data"],
+    "properties": {
+      "provider": {
+        "type": "string",
+        "const": "kubernetes"
+      },
+      "type": {
+        "type": "string",
+        "const": "config_map"
+      },
+      "id": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$"
+      },
+      "metadata": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$",
+            "maxLength": 63
+          },
+          "labels": {
+            "type": "object",
+            "patternProperties": {
+              "^[a-z0-9-]+$": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "data": {
+        "type": "object",
+        "patternProperties": {
+          "^[a-zA-Z0-9-_.]+$": {
+            "type": "string"
+          }
+        },
+        "minProperties": 1
+      },
+      "binaryData": {
+        "type": "object",
+        "patternProperties": {
+          "^[a-zA-Z0-9-_.]+$": {
+            "type": "string",
+            "contentEncoding": "base64"
+          }
+        }
+      }
+    },
+    "errorMessages": {
+      "data": "Keys must be alphanumeric with '-', '_', or '.'",
+      "metadata.name": "Name must be lowercase alphanumeric with hyphens (e.g., 'app-config')"
+    }
+  }
+  
