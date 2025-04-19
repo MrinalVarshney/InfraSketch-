@@ -555,12 +555,9 @@ export default function Home() {
     [setNodes]
   );
 
-
   const generateId = () => Math.random().toString(36).substring(2, 10);
 
-  const handleSave = async (
-    reactFlowInstance: ReactFlowInstance
-  ) => {
+  const handleSave = async (reactFlowInstance: ReactFlowInstance) => {
     const userEmail = "firstone";
 
     if (!userEmail) {
@@ -568,13 +565,12 @@ export default function Home() {
       return;
     }
 
-    const diagramName =  prompt('Enter a name for your project:');
+    const diagramName = prompt("Enter a name for your project:");
     if (!diagramName) {
-      console.error('Diagram name is required');
+      console.error("Diagram name is required");
       return;
     }
 
-   
     //const viewport = reactFlowInstance.getViewport();
 
     try {
@@ -583,7 +579,7 @@ export default function Home() {
         project_name: diagramName,
         nodes,
         edges,
-       // viewport,
+        // viewport,
         elasticIP_association,
       });
 
@@ -594,7 +590,7 @@ export default function Home() {
 
       if (!selectedProject) {
         setSelectedProject(diagramName);
-      //  const res = await axios.get(`/api/load-diagram-name?name=${diagramName}`);
+        //  const res = await axios.get(`/api/load-diagram-name?name=${diagramName}`);
         setProjectNames(res.data.map((project: any) => project.project_name));
       }
     } catch (err) {
@@ -625,18 +621,20 @@ export default function Home() {
 
   const loadSpecificDiagram = async (projectName: string) => {
     try {
-      const res = await axios.get(`/api/load-diagram-name?name=${projectName}&&email=${userEmail}`);
+      const res = await axios.get(
+        `/api/load-diagram-name?name=${projectName}&&email=${userEmail}`
+      );
       const { nodes, edges, viewport, elasticIP_association } = res.data[0];
-      console.log("snfsifisf")
+      console.log("snfsifisf");
       //  console.log(res.data)
       setNodes(nodes);
       setEdges(edges);
       setElasticIPAssociation(elasticIP_association || []);
-      
+
       if (viewport) {
         setViewport(viewport);
       }
-      
+
       setShowProjectList(false);
       setSelectedProject(projectName);
       toast({
@@ -709,73 +707,93 @@ export default function Home() {
   function handleExport() {
     const { nodes: layoutedNodes } = getLayoutedElements(nodes, edges);
     console.log(nodes);
-    const projectName = "test";
+    const name = "test";
     let services: any[] = [];
-    nodes.forEach((node: Node) => {
-      if (node.data.label === "SecurityGroup") return;
-      services.push({
-        id: node.id,
-        provider: node.data.provider,
-        type: node.data.rawLabel,
-        ...(typeof node.data.properties === "object" && node.data.properties
-          ? node.data.properties
-          : {}),
-      });
-    });
-
-    elasticIP_association.map((eip_association) => {
-      services.push(eip_association);
-    });
-
-    const securityGroupNodes = nodes.filter((node: Node) => {
-      return node.data.label === "SecurityGroup";
-    });
-
-    console.log("securityGroupNodes", securityGroupNodes);
-
-    if (securityGroupNodes.length > 0) {
-      securityGroupNodes.forEach((node: Node) => {
-        const ingressRules = node.data.properties.ingress || [];
-        const egressRules = node.data.properties.egress || [];
-
+    const provider = nodes[0].data.provider;
+    if (provider === "aws") {
+      nodes.forEach((node: Node) => {
+        if (node.data.label === "SecurityGroup") return;
         services.push({
+          id: node.id,
           provider: node.data.provider,
           type: node.data.rawLabel,
+          ...(typeof node.data.properties === "object" && node.data.properties
+            ? node.data.properties
+            : {}),
+        });
+      });
+
+      elasticIP_association.map((eip_association) => {
+        services.push(eip_association);
+      });
+
+      const securityGroupNodes = nodes.filter((node: Node) => {
+        return node.data.label === "SecurityGroup";
+      });
+
+      console.log("securityGroupNodes", securityGroupNodes);
+
+      if (securityGroupNodes.length > 0) {
+        securityGroupNodes.forEach((node: Node) => {
+          const ingressRules = node.data.properties.ingress || [];
+          const egressRules = node.data.properties.egress || [];
+
+          services.push({
+            provider: node.data.provider,
+            type: node.data.rawLabel,
+            id: node.id,
+            refs: node.data.properties.refs,
+            description: node.data.properties.description,
+            tags: node.data.properties.tags,
+          });
+
+          ingressRules.forEach((rule: any) => {
+            services.push({
+              provider: node.data.provider,
+              type: "vpc_security_group_ingress_rule",
+              id: generateId(),
+              refs: {
+                security_group: node.id,
+              },
+              ...rule,
+            });
+          });
+
+          egressRules.forEach((rule: any) => {
+            services.push({
+              provider: node.data.provider,
+              type: "vpc_security_group_egress_rule",
+              id: generateId(),
+              refs: {
+                security_group: node.id,
+              },
+              ...rule,
+            });
+          });
+        });
+      }
+    } else if (provider === "kubernetes") {
+      console.log("kubernetes");
+      console.log(nodes);
+      nodes.map((node: Node) => {
+        services.push({
           id: node.id,
-          refs: node.data.properties.refs,
-          description: node.data.properties.description,
-          tags: node.data.properties.tags,
-        });
-
-        ingressRules.forEach((rule: any) => {
-          services.push({
-            provider: node.data.provider,
-            type: "vpc_security_group_ingress_rule",
-            id: generateId(),
-            refs: {
-              security_group: node.id,
-            },
-            ...rule,
-          });
-        });
-
-        egressRules.forEach((rule: any) => {
-          services.push({
-            provider: node.data.provider,
-            type: "vpc_security_group_egress_rule",
-            id: generateId(),
-            refs: {
-              security_group: node.id,
-            },
-            ...rule,
-          });
+          type: node.data.rawLabel,
+          provider: node.data.provider,
+          ...(typeof node.data.properties === "object" && node.data.properties
+            ? node.data.properties
+            : {}),
         });
       });
     }
     // / Create JSON data
     const exportData = {
-      project: projectName,
-      services,
+      connected_services: [
+        {
+          name,
+          services,
+        },
+      ],
     };
 
     console.log("export  ", exportData);
@@ -787,7 +805,7 @@ export default function Home() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${projectName}-infra.json`;
+    a.download = `${name}-infra.json`;
     a.click();
     URL.revokeObjectURL(url); // Clean up
   }
@@ -862,9 +880,9 @@ export default function Home() {
               <div className="flex flex-col gap-2 bg-card shadow-sm rounded-md p-4 max-h-96 overflow-y-auto">
                 <div className="flex justify-between items-center">
                   <h3 className="font-medium">Saved Projects</h3>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => setShowProjectList(false)}
                     className="h-8 w-8 p-0"
                   >
@@ -886,7 +904,9 @@ export default function Home() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">No saved projects found</p>
+                  <p className="text-sm text-muted-foreground">
+                    No saved projects found
+                  </p>
                 )}
               </div>
             ) : (
@@ -894,6 +914,10 @@ export default function Home() {
                 <Button variant="outline" size="sm" onClick={handleSave}>
                   <Save size={16} className="mr-1" />
                   Save
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleExport}>
+                  <Save size={16} className="mr-1" />
+                  Export
                 </Button>
                 <Button variant="outline" size="sm" onClick={loadDiagram}>
                   <Save size={16} className="mr-1" />
