@@ -1,0 +1,82 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "AWS Route Table Association Validation Schema",
+    "description": "Validates subnet/main route table associations with conflict prevention",
+    "type": "object",
+    "required": ["provider", "type", "id", "refs"],
+    "properties": {
+      "provider": {
+        "type": "string",
+        "const": "aws"
+      },
+      "type": {
+        "type": "string",
+        "const": "route_table_association"
+      },
+      "id": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$",
+        "maxLength": 64,
+        "description": "Terraform resource ID (must be unique)"
+      },
+      "refs": {
+        "type": "object",
+        "oneOf": [
+          {
+            "required": ["subnet", "route_table"],
+            "properties": {
+              "subnet": {
+                "type": "string",
+                "pattern": "^[a-z0-9-]+$",
+                "description": "Reference to subnet resource ID"
+              },
+              "route_table": {
+                "type": "string",
+                "pattern": "^[a-z0-9-]+$",
+                "description": "Reference to route table resource ID"
+              },
+              "gateway": false
+            },
+            "additionalProperties": false
+          },
+          {
+            "required": ["gateway", "route_table"],
+            "properties": {
+              "gateway": {
+                "type": "string",
+                "pattern": "^[a-z0-9-]+$",
+                "description": "Reference to internet gateway resource ID"
+              },
+              "route_table": {
+                "type": "string",
+                "pattern": "^[a-z0-9-]+$",
+                "description": "Reference to route table resource ID"
+              },
+              "subnet": false
+            },
+            "additionalProperties": false
+          }
+        ],
+        "errorMessage": "Must associate either a subnet OR gateway (not both)"
+      }
+    },
+    "if": {
+      "properties": {
+        "refs": {
+          "properties": {
+            "gateway": { "const": false }
+          }
+        }
+      }
+    },
+    "then": {
+      "required": ["refs.subnet"],
+      "errorMessage": "Subnet association requires subnet reference"
+    },
+    "errorMessages": {
+      "id": "Must be a valid Terraform identifier (lowercase alphanumeric + hyphens)",
+      "refs.route_table": "Must reference a valid route table ID",
+      "refs.subnet": "Must reference a valid subnet ID when not using gateway"
+    }
+  }
+  

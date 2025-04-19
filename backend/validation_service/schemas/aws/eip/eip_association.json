@@ -1,0 +1,64 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "AWS EIP Association Configuration",
+    "type": "object",
+    "properties": {
+      "provider": {
+        "type": "string",
+        "description": "Defines the infrastructure provider.",
+        "enum": ["aws"]
+      },
+      "type": {
+        "type": "string",
+        "description": "Defines the resource type.",
+        "enum": ["eip_association"]
+      },
+      "id": {
+        "type": "string",
+        "description": "Unique identifier for the EIP association.",
+        "pattern": "^[a-zA-Z0-9-_]+$"
+      },
+      "refs": {
+        "type": "object",
+        "description": "Reference object for dependent resources.",
+        "properties": {
+          "instance": {
+            "type": "string",
+            "description": "Reference to the EC2 instance ID to associate the EIP with.",
+            "pattern": "^[a-zA-Z0-9-_]+$"
+          },
+          "eip": {
+            "type": "string",
+            "description": "Reference to the Elastic IP allocation.",
+            "pattern": "^[a-zA-Z0-9-_]+$"
+          }
+        },
+        "required": ["instance", "eip"],
+        "additionalProperties": false
+      },
+      "depends_on": {
+        "type": "array",
+        "description": "Optional list of dependencies.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "Type of the dependent resource.",
+              "pattern": "^[a-zA-Z0-9-_]+$"
+            },
+            "id": {
+              "type": "string",
+              "description": "ID of the dependent resource.",
+              "pattern": "^[a-zA-Z0-9-_]+$"
+            }
+          },
+          "required": ["type", "id"],
+          "additionalProperties": false
+        }
+      }
+    },
+    "required": ["provider", "type", "id", "refs"],
+    "additionalProperties": false
+  }
+  
