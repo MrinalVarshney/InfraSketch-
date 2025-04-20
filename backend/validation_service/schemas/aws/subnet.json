@@ -1,0 +1,103 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AWS Subnet Validation Schema",
+  "description": "Validates Terraform-style subnet configurations with CIDR and AZ rules",
+  "type": "object",
+  "required": [
+    "provider",
+    "type",
+    "id",
+    "cidr_block",
+    "availability_zone",
+    "refs"
+  ],
+  "properties": {
+    "provider": {
+      "type": "string",
+      "const": "aws"
+    },
+    "type": {
+      "type": "string",
+      "const": "subnet"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "maxLength": 64,
+      "description": "Terraform resource ID (must be unique)"
+    },
+    "name": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9-]+$",
+      "maxLength": 64,
+      "description": "Subnet name tag"
+    },
+    "cidr_block": {
+      "type": "string",
+      "format": "cidr",
+      "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)/(2[0-9]|3[0-2])$",
+      "description": "CIDR block (/16 to /28 within VPC range)"
+    },
+    "availability_zone": {
+      "type": "string",
+      "pattern": "^[a-z]{2}-[a-z]+-\\d[a-z]$",
+      "description": "AWS AZ ID (e.g., us-east-1a)"
+    },
+    "map_public_ip_on_launch": {
+      "type": "boolean",
+      "default": false,
+      "description": "Auto-assign public IPs (required for public subnets)"
+    },
+    "refs": {
+      "type": "object",
+      "required": ["vpc"],
+      "properties": {
+        "vpc": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$",
+          "description": "Reference to VPC resource ID"
+        }
+      },
+      "additionalProperties": false
+    },
+    "tags": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z0-9 _.:/=+@-]{1,128}$": {
+          "type": "string",
+          "maxLength": 256
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "if": {
+    "properties": {
+      "tags": {
+        "properties": {
+          "Type": { "const": "Public" }
+        }
+      }
+    }
+  },
+  "then": {
+    "required": ["map_public_ip_on_launch"],
+    "properties": {
+      "map_public_ip_on_launch": { "const": true },
+      "cidr_block": {
+        "not": {
+          "pattern": "^(10\\.(0|1[0-9]|2[0-4])\\.|172\\.(1[6-9]|2[0-9]|3[0-1])\\.|192\\.168\\."
+        }
+      }
+    },
+    "errorMessage": {
+      "map_public_ip_on_launch": "Public subnets must auto-assign public IPs",
+      "cidr_block": "Avoid RFC 1918 ranges for public subnets"
+    }
+  },
+  "errorMessages": {
+    "cidr_block": "Must be valid IPv4 CIDR within VPC range (e.g., 10.0.1.0/24)",
+    "availability_zone": "Invalid AZ format (e.g., ap-south-1a)",
+    "refs.vpc": "Must reference a valid VPC resource ID"
+  }
+}

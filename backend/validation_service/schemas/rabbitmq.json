@@ -1,0 +1,66 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "RabbitMQ Service Configuration",
+    "type": "object",
+    "properties": {
+        "provider": {
+            "type": "string",
+            "enum": ["docker", "kubernetes"],
+            "description": "Defines the infrastructure provider."
+        },
+        "type": {
+            "type": "string",
+            "enum": ["rabbitmq"],
+            "description": "Defines the service type."
+        },
+        "name": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9-_]+$",
+            "description": "The name of the RabbitMQ service."
+        },
+        "image": {
+            "type": "string",
+            "description": "The Docker image to use for the RabbitMQ service.",
+            "default": "rabbitmq:3-management"
+        },
+        "ports": {
+            "type": "object",
+            "properties": {
+                "rabbitmq_port": {
+                    "type": "integer",
+                    "description": "Port for RabbitMQ message broker.",
+                    "default": 5672
+                },
+                "rabbitmq_management_port": {
+                    "type": "integer",
+                    "description": "Port for RabbitMQ management UI.",
+                    "default": 15672
+                }
+            },
+            "required": ["rabbitmq_port", "rabbitmq_management_port"]
+        },
+        "env": {
+            "type": "object",
+            "properties": {
+                "RABBITMQ_DEFAULT_USER": {
+                    "type": "string",
+                    "description": "Default username for RabbitMQ.",
+                    "minLength": 3,
+                    "default": "guest"
+                },
+                "RABBITMQ_DEFAULT_PASS": {
+                    "type": "string",
+                    "description": "Default password for RabbitMQ.",
+                    "minLength": 4,
+                    "default": "guest"
+                }
+            },
+            "required": ["RABBITMQ_DEFAULT_USER", "RABBITMQ_DEFAULT_PASS"]
+        },
+        "network": {
+            "type": "string",
+            "description": "Docker network name to connect the RabbitMQ container."
+        }
+    },
+    "required": ["provider", "type", "name", "ports", "env"]
+}

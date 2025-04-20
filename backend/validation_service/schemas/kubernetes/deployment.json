@@ -1,0 +1,140 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Kubernetes Deployment Validation Schema",
+  "description": "Validates a Kubernetes Deployment definition",
+  "type": "object",
+  "required": ["provider", "type", "id", "metadata", "spec"],
+  "properties": {
+    "provider": {
+      "type": "string",
+      "const": "kubernetes"
+    },
+    "type": {
+      "type": "string",
+      "const": "deployment"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$",
+          "maxLength": 63
+        },
+        "labels": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-z0-9-]+$": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "spec": {
+      "type": "object",
+      "required": ["replicas", "selector", "template"],
+      "properties": {
+        "replicas": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "selector": {
+          "type": "object",
+          "required": ["matchLabels"],
+          "properties": {
+            "matchLabels": {
+              "type": "object",
+              "patternProperties": {
+                "^[a-z0-9-]+$": {
+                  "type": "string"
+                }
+              },
+              "minProperties": 1
+            }
+          }
+        },
+        "template": {
+          "type": "object",
+          "required": ["metadata", "spec"],
+          "properties": {
+            "metadata": {
+              "type": "object",
+              "required": ["labels"],
+              "properties": {
+                "labels": {
+                  "type": "object",
+                  "patternProperties": {
+                    "^[a-z0-9-]+$": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "spec": {
+              "type": "object",
+              "required": ["containers"],
+              "properties": {
+                "containers": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["name", "image"],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "pattern": "^[a-z0-9-]+$"
+                      },
+                      "image": {
+                        "type": "string"
+                      },
+                      "ports": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "required": ["containerPort"],
+                          "properties": {
+                            "containerPort": {
+                              "type": "integer",
+                              "minimum": 1,
+                              "maximum": 65535
+                            }
+                          }
+                        }
+                      },
+                      "resources": {
+                        "type": "object",
+                        "properties": {
+                          "limits": {
+                            "type": "object",
+                            "required": ["cpu", "memory"],
+                            "properties": {
+                              "cpu": {
+                                "type": "string",
+                                "pattern": "^[0-9]+m$|^[0-9]+$"
+                              },
+                              "memory": {
+                                "type": "string",
+                                "pattern": "^[0-9]+(Gi|Mi)$"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
