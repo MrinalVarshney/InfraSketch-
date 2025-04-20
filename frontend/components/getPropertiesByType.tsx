@@ -5,7 +5,6 @@ export function getPropertiesByType(type: string, provider: string) {
       switch (type) {
         case "Deployment":
           return {
-            id: "",
             metadata: {
               name: "",
               labels: {},
@@ -27,9 +26,6 @@ export function getPropertiesByType(type: string, provider: string) {
           };
         case "Service":
           return {
-            id: "",
-            provider: provider,
-            type: "",
             metadata: {
               name: "",
               labels: {},
@@ -45,9 +41,6 @@ export function getPropertiesByType(type: string, provider: string) {
           };
         case "Secret":
           return {
-            id: "",
-            provider: provider,
-            type: "",
             metadata: {
               name: "",
               labels: {},
@@ -58,9 +51,6 @@ export function getPropertiesByType(type: string, provider: string) {
           };
         case "ConfigMap":
           return {
-            id: "",
-            provider: provider,
-            type: "",
             metadata: {
               name: "",
               labels: {},

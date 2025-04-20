@@ -55,6 +55,7 @@ export default function KubernetesServiceFields({
     control,
     reset,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<FormValues>({
     defaultValues: {
@@ -249,11 +250,15 @@ export default function KubernetesServiceFields({
                 control={control}
                 render={({ field }) => (
                   <Select
-                    onValueChange={(value) =>
+                    onValueChange={(value) => {
                       field.onChange(
                         isNaN(Number(value)) ? value : Number(value)
-                      )
-                    }
+                      );
+                      setValue(
+                        `spec.ports.${index}.targetPort`,
+                        isNaN(Number(value)) ? value : Number(value)
+                      );
+                    }}
                     value={field.value?.toString()}
                   >
                     <SelectTrigger>
@@ -281,11 +286,11 @@ export default function KubernetesServiceFields({
                 placeholder="80"
               />
             )}
-            {errors.spec?.ports?.[index]?.targetPort && (
+            {/* {errors.spec?.ports?.[index]?.targetPort && (
               <span className="text-red-500 text-sm">
                 Valid target port is required
               </span>
-            )}
+            )} */}
           </div>
 
           {serviceType === "NodePort" && (

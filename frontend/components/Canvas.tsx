@@ -19,7 +19,7 @@ import {
   ReactFlowInstance,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import toast from "react-hot-toast";
+// import toast from "react-hot-toast";
 import ServiceNode from "@/components/ServiceNode";
 import ServicePanel from "@/components/ServicePanel";
 import PropertiesPanel from "@/components/propertiesPanel/PropertiesPanel";
@@ -171,14 +171,14 @@ export default function Home() {
         });
       } catch (error) {
         console.error("Error parsing drag data:", error);
-        toast({
-          title: "Error adding service",
-          description: "Failed to add service to canvas.",
-          variant: "destructive",
-        });
+        // toast({
+        //   title: "Error adding service",
+        //   description: "Failed to add service to canvas.",
+        //   variant: "destructive",
+        // });
       }
     },
-    [screenToFlowPosition, nodes, setNodes, toast]
+    [screenToFlowPosition, nodes, setNodes]
   );
 
   const handleConnect = useCallback(
@@ -556,7 +556,14 @@ export default function Home() {
     [setNodes]
   );
 
-  const generateId = () => Math.random().toString(36).substring(2, 10);
+  const generateId = (length = 8) => {
+    const letters = "abcdefghijklmnopqrstuvwxyz";
+    let id = "";
+    for (let i = 0; i < length; i++) {
+      id += letters[Math.floor(Math.random() * letters.length)];
+    }
+    return id;
+  };
 
   const handleSave = async (reactFlowInstance: ReactFlowInstance) => {
     const userEmail = "firstone";
@@ -827,13 +834,26 @@ export default function Home() {
     // Trigger download
 
     try {
-      const response = await axios.post(
-        "http://localhost:8000/generate",
-        exportData
-      );
+      // utils/downloadZip.ts
+      const response = await fetch("http://localhost:8000/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(exportData),
+      });
 
-      const blob = new Blob([response.data], { type: "application/zip" });
+      if (!response.ok) throw new Error("Failed to generate file");
+
+      const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "generated_k8s_files.zip";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
       const link = document.createElement("a");
       link.href = url;
       link.setAttribute("download", "kubernetes_files.zip");

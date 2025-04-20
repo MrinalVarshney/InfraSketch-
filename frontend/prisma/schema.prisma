@@ -56,11 +56,3 @@ model VerificationToken {
 
   @@unique([identifier, token])
 }
-
-model PasswordResetToken {
-  id        String   @id @default(cuid())
-  email     String
-  token     String   @unique
-  createdAt DateTime @default(now())
-  expiresAt DateTime
-}

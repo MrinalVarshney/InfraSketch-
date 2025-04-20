@@ -10,6 +10,13 @@
 !.yarn/releases
 !.yarn/versions
 
+# Prisma engine files (optional)
+.prisma/
+
+
+prisma/migrations
+prisma/generated
+
 # testing
 /coverage
 

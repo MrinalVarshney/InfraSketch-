@@ -3,11 +3,11 @@ import { ServiceData } from "@/types/service";
 export const services: ServiceData = {
   aws: [
     { label: "EC2", type: "compute", rawLabel: "ec2_instance" },
-    { label: "S3", type: "storage" },
-    { label: "RDS", type: "database" },
+    { label: "S3", type: "storage", rawLabel: "s3_bucket" },
+    { label: "RDS", type: "database", rawLabel: "rds_instance" },
     { label: "VPC", type: "network", rawLabel: "vpc" },
-    { label: "ECS", type: "container" },
-    { label: "EKS", type: "kubernetes" },
+    { label: "ECS", type: "container", rawLabel: "ecs_cluster" },
+    { label: "EKS", type: "kubernetes", rawLabel: "eks_cluster" },
     { label: "ElasticIP", type: "elastic", rawLabel: "eip" },
     {
       label: "InternetGateway",
@@ -46,13 +46,22 @@ export const services: ServiceData = {
     { label: "Network", type: "network" },
   ],
   kubernetes: [
-    { label: "Pod", type: "kubernetes" },
-    { label: "Deployment", type: "kubernetes" },
-    { label: "Service", type: "network" },
-    { label: "ConfigMap", type: "storage" },
-    { label: "Secret", type: "secret" },
-    { label: "PersistentVolume", type: "storage" },
-    { label: "Ingress", type: "network" },
-    { label: "NameSpace", type: "kubernetes" },
+    { label: "Pod", type: "kubernetes", rawLabel: "pod" },
+    { label: "Deployment", type: "kubernetes", rawLabel: "deployment" },
+    { label: "Service", type: "network", rawLabel: "service" },
+    { label: "ConfigMap", type: "storage", rawLabel: "config_map" },
+    { label: "Secret", type: "secret", rawLabel: "secret" },
+    {
+      label: "PersistentVolume",
+      type: "storage",
+      rawLabel: "persistent_volume",
+    },
+    {
+      label: "PersistentVolumeClaim",
+      type: "storage",
+      rawLabel: "persistent_volume_claim",
+    },
+    { label: "Ingress", type: "network", rawLabel: "ingress" },
+    { label: "NameSpace", type: "kubernetes", rawLabel: "namespace" },
   ],
 };

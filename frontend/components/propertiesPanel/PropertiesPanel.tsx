@@ -12,7 +12,8 @@ import KubernetesServiceFields from "./k8s/service";
 import KubernetesIngressFields from "./k8s/ingress";
 import KubernetesSecretFields from "./k8s/secret";
 import SecurityGroupFields from "./aws/Security_group";
-
+import KubernetesPersistentVolumeFields from "./k8s/persistentVolume";
+import KubernetesPersistentVolumeClaimFields from "./k8s/persistentVolumeClaim";
 import {
   ServiceProviderType,
   K8sServiceType,
@@ -21,6 +22,8 @@ import {
 import VPCfields from "./aws/VPCfields";
 import ConfigMapFields from "./k8s/configMap";
 import RouteTableFields from "./aws/RouteTableFields";
+import LoadBalancerFields from "./aws/LoadBalancer";
+import TargetGroupFields from "./aws/TargetGroup";
 
 interface PropertiesPanelProps {
   selectedNode: Node | null;
@@ -70,6 +73,22 @@ export default function PropertiesPanel({
         case "Ingress":
           return (
             <KubernetesIngressFields
+              selectedNode={selectedNode}
+              onNodeUpdate={onNodeUpdate}
+            />
+          );
+
+        case "PersistentVolume":
+          return (
+            <KubernetesPersistentVolumeFields
+              selectedNode={selectedNode}
+              onNodeUpdate={onNodeUpdate}
+            />
+          );
+
+        case "PersistentVolumeClaim":
+          return (
+            <KubernetesPersistentVolumeClaimFields
               selectedNode={selectedNode}
               onNodeUpdate={onNodeUpdate}
             />
@@ -149,6 +168,21 @@ export default function PropertiesPanel({
               onNodeUpdate={onNodeUpdate}
             />
           );
+        case "LoadBalancer":
+          return (
+            <LoadBalancerFields
+              selectedNode={selectedNode}
+              onNodeUpdate={onNodeUpdate}
+            />
+          );
+        case "TargetGroup":
+          return (
+            <TargetGroupFields
+              selectedNode={selectedNode}
+              onNodeUpdate={onNodeUpdate}
+            />
+          );
+
         default:
           return (
             <ContainerFields

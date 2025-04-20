@@ -2,6 +2,7 @@
 
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
+import { Toaster } from "react-hot-toast";
 
 export default function RootLayout({
   children,
@@ -9,10 +10,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div >
-        <SessionProvider>{children}</SessionProvider>
+    <div>
+      <SessionProvider>
+        {children}
+        <Toaster position="bottom-center" />
+      </SessionProvider>
     </div>
-        
-     
   );
 }

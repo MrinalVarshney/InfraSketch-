@@ -31,6 +31,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { set } from "lodash";
 
 interface PropertiesPanelProps {
   selectedNode: Node | null;
@@ -61,6 +62,10 @@ interface Container {
       };
     };
   }[];
+  volumeMounts?: {
+    name: string;
+    mountPath: string;
+  }[];
 }
 
 interface FormValues {
@@ -80,6 +85,12 @@ interface FormValues {
       };
       spec: {
         containers: Container[];
+        volumes?: {
+          name: string;
+          persistentVolumeClaim?: {
+            claimName: string;
+          };
+        }[];
       };
     };
   };
@@ -112,6 +123,7 @@ export default function KubernetesDeploymentFields({
   const { getNodes, getNode } = useReactFlow();
   const [availableSecrets, setAvailableSecrets] = useState<Node[]>([]);
   const [availableConfigMaps, setAvailableConfigMaps] = useState<Node[]>([]);
+  const [availablePVC, setAvailablePVC] = useState<Node[]>([]);
   const [envVarModal, setEnvVarModal] = useState<EnvVarModalState>({
     isOpen: false,
     containerIndex: null,
@@ -136,6 +148,15 @@ export default function KubernetesDeploymentFields({
     name: "spec.template.spec.containers",
   });
 
+  const {
+    fields: volumes,
+    append: appendVolume,
+    remove: removeVolume,
+  } = useFieldArray({
+    control,
+    name: "spec.template.spec.volumes",
+  });
+
   // Find connected secret nodes in the graph
   useEffect(() => {
     if (selectedNode?.data.connections) {
@@ -153,12 +174,24 @@ export default function KubernetesDeploymentFields({
           (node): node is Node =>
             node !== undefined && node.data?.label === "ConfigMap"
         );
-      setAvailableConfigMaps(connectedConfigNodes);
+
+      const connectedPVC: Node[] = selectedNode.data.connections
+        .map((connectionId: string) => getNode(connectionId))
+        .filter(
+          (node): node is Node =>
+            node !== undefined && node.data?.label === "PersistentVolumeClaim"
+        );
+      if (connectedPVC.length > 0) {
+        setAvailablePVC(connectedPVC);
+      }
     } else {
       setAvailableSecrets([]);
       setAvailableConfigMaps([]);
+      setAvailablePVC([]);
     }
   }, [selectedNode?.data.connections, getNode]);
+
+  console.log("Available PVC", availablePVC);
 
   // Update form when selected node changes
   useEffect(() => {
@@ -298,6 +331,25 @@ export default function KubernetesDeploymentFields({
     setValue(`spec.template.spec.containers`, containers);
   };
 
+  // Volume management
+  const addVolumeMount = (containerIndex: number) => {
+    const containers = [...watch(`spec.template.spec.containers`)];
+    if (!containers[containerIndex].volumeMounts) {
+      containers[containerIndex].volumeMounts = [];
+    }
+    containers[containerIndex].volumeMounts!.push({
+      name: "",
+      mountPath: "",
+    });
+    setValue(`spec.template.spec.containers`, containers);
+  };
+
+  const removeVolumeMount = (containerIndex: number, mountIndex: number) => {
+    const containers = [...watch(`spec.template.spec.containers`)];
+    containers[containerIndex].volumeMounts?.splice(mountIndex, 1);
+    setValue(`spec.template.spec.containers`, containers);
+  };
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {/* Deployment Name */}
@@ -346,6 +398,100 @@ export default function KubernetesDeploymentFields({
           {...register("spec.template.metadata.labels.app")}
           placeholder="nginx"
         />
+      </div>
+
+      {/* Volumes Section */}
+      <div className="space-y-4">
+        <h3 className="text-md font-semibold">Volumes</h3>
+        {volumes.map((volume, volumeIndex) => (
+          <div key={volume.id} className="border p-3 rounded space-y-2">
+            <div className="grid gap-1.5">
+              <Label>Volume Name</Label>
+              <Input
+                {...register(`spec.template.spec.volumes.${volumeIndex}.name`)}
+                placeholder="volume-name"
+              />
+            </div>
+
+            <div className="grid gap-1.5">
+              <Label>Persistent Volume Claim</Label>
+              {availablePVC.length > 0 && (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-between",
+                        watch(
+                          `spec.template.spec.volumes.${volumeIndex}.persistentVolumeClaim.claimName`
+                        )
+                          ? ""
+                          : "text-muted-foreground"
+                      )}
+                    >
+                      {watch(
+                        `spec.template.spec.volumes.${volumeIndex}.persistentVolumeClaim.claimName`
+                      ) || "Select PVC"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-72">
+                    <div className="grid gap-1.5">
+                      <Label>Available PVC</Label>
+                      <Select
+                        defaultValue={watch(
+                          `spec.template.spec.volumes.${volumeIndex}.persistentVolumeClaim.claimName`
+                        )}
+                        onValueChange={(value) =>
+                          setValue(
+                            `spec.template.spec.volumes.${volumeIndex}.persistentVolumeClaim.claimName`,
+                            value
+                          )
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select PVC" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {/* Assuming availablePVC.data is an array of PVC objects */}
+                          {availablePVC.map((pvc: any) => {
+                            console.log("PVC", pvc);
+                            return (
+                              <SelectItem
+                                key={pvc.data.properties.metadata?.name}
+                                value={pvc.data.properties.metadata?.name}
+                              >
+                                {pvc.data.properties.metadata.name}
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              )}
+            </div>
+
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              onClick={() => removeVolume(volumeIndex)}
+            >
+              Remove Volume
+            </Button>
+          </div>
+        ))}
+
+        <Button
+          type="button"
+          onClick={() =>
+            appendVolume({ name: "", persistentVolumeClaim: { claimName: "" } })
+          }
+        >
+          <PlusCircle className="h-4 w-4 mr-2" />
+          Add Volume
+        </Button>
       </div>
 
       {/* Containers */}
@@ -441,6 +587,72 @@ export default function KubernetesDeploymentFields({
               <PlusCircle className="h-4 w-4 mr-2" />
               Add Environment Variable
             </Button>
+            {/* Volume Mounts */}
+            <div className="mt-4">
+              <Label>Volume Mounts</Label>
+              {watch(
+                `spec.template.spec.containers.${containerIndex}.volumeMounts`
+              )?.map((mount, mountIndex) => (
+                <div
+                  key={mountIndex}
+                  className="grid grid-cols-12 gap-2 items-center mb-2"
+                >
+                  <div className="col-span-5">
+                    <Controller
+                      control={control}
+                      name={`spec.template.spec.containers.${containerIndex}.volumeMounts.${mountIndex}.name`}
+                      render={({ field }) => (
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select volume" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {volumes.map((volume, i) => (
+                              <SelectItem key={i} value={volume.name}>
+                                {volume.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                  </div>
+                  <div className="col-span-5">
+                    <Input
+                      {...register(
+                        `spec.template.spec.containers.${containerIndex}.volumeMounts.${mountIndex}.mountPath`
+                      )}
+                      placeholder="Mount path"
+                    />
+                  </div>
+                  <div className="col-span-2 flex justify-end">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() =>
+                        removeVolumeMount(containerIndex, mountIndex)
+                      }
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={() => addVolumeMount(containerIndex)}
+              >
+                <PlusCircle className="h-4 w-4 mr-2" />
+                Add Volume Mount
+              </Button>
+            </div>
           </div>
 
           <Button

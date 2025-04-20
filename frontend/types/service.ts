@@ -15,7 +15,8 @@ export type K8sServiceType =
   | "InternetGateway"
   | "ElasticIP"
   | "Subnet"
-  | "Ingress";
+  | "Ingress"
+  | "PersistentVolumeClaim";
 
 export type AwsServiceType =
   | "EC2"
