@@ -1,21 +1,24 @@
-{% if storage_needed %}
----
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ pv_name | default("mongodb-pv") }}
+  name: {{ metadata.name | default("mongodb-pv") }}
+  {% if metadata.labels %}
   labels:
-    app: {{ app_label | default("mongodb") }}
-    type: {{ pv_type | default("local") }}
+    app: {{ metadata.labels.app | default("mongodb") }}
+    type: {{ spec.type | default("local") }}
+  {% endif %}  
 spec:
-  storageClassName: {{ storage_class | default("manual") }}
+  storageClassName: {{ spec.storageClassName | default("manual") }}
   capacity:
-    storage: {{ storage_size | default("10Gi") }}
+    storage: {{ spec.capacity.storage | default("10Gi") }}
   accessModes:
-    - {{ access_mode | default("ReadWriteOnce") }}
-  {% if pv_type == "local" %}
-  local:
-    path: {{ local_path | default("/data/db") }}
+    - {{ spec.accessModes | default("ReadWriteOnce") }}
+  {% if spec.type == "local" %}
+  hostPath:
+    path: {{ spec.hostPath.path | default("/data/db") }}
+  persistentVolumeReclaimPolicy: {{ spec.persistentVolumeReclaimPolicy | default("Retain") }}
+  volumeMode: {{ spec.volumeMode | default("Filesystem") }}
+  {% if nodeAffinity %}
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -24,6 +27,7 @@ spec:
           operator: In
           values:
           - {{ node_name | default("worker-node-1") }}
+  {% endif %}
   {% elif pv_type == "cloud" %}
   persistentVolumeReclaimPolicy: {{ reclaim_policy | default("Retain") }}
   {% if cloud_provider == "aws" %}
@@ -36,20 +40,3 @@ spec:
     fsType: {{ fs_type | default("ext4") }}
   {% endif %}
   {% endif %}
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: {{ pvc_name | default("mongodb-pvc") }}
-  namespace: {{ namespace | default("default") }}
-spec:
-  storageClassName: {{ storage_class | default("manual") }}
-  accessModes:
-    - {{ access_mode | default("ReadWriteOnce") }}
-  resources:
-    requests:
-      storage: {{ storage_size | default("10Gi") }}
-  selector:
-    matchLabels:
-      app: {{ app_label | default("mongodb") }}
-{% endif %}

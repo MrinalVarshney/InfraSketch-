@@ -1,0 +1,120 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Terraform AWS EC2 Instance Validation Schema",
+  "description": "Validates EC2 instances for Terraform provisioning with VPC/subnet references",
+  "type": "object",
+  "required": ["provider", "type", "id", "ami", "instance_type", "refs"],
+  "properties": {
+    "provider": {
+      "type": "string",
+      "const": "aws"
+    },
+    "type": {
+      "type": "string",
+      "const": "ec2_instance"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "maxLength": 64,
+      "description": "Terraform resource ID (must be unique within module)"
+    },
+    "name": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9-]+$",
+      "maxLength": 64,
+      "description": "EC2 instance name tag"
+    },
+    "ami": {
+      "type": "string",
+      "pattern": "^ami-[0-9a-f]{8,17}$",
+      "description": "Valid AMI ID"
+    },
+    "instance_type": {
+      "type": "string",
+      "enum": [
+        "t2.micro",
+        "t2.small",
+        "t3.micro",
+        "t3.small",
+        "m5.large",
+        "c5.xlarge",
+        "r5.2xlarge"
+      ],
+      "description": "AWS instance type"
+    },
+    "refs": {
+      "type": "object",
+      "required": ["vpc", "subnet", "security_group"],
+      "properties": {
+        "vpc": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$",
+          "description": "Reference to VPC resource ID in Terraform"
+        },
+        "subnet": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$",
+          "description": "Reference to subnet resource ID in Terraform"
+        },
+        "security_group": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$",
+          "description": "Reference to security group resource ID in Terraform"
+        }
+      }
+    },
+    "tags": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z0-9 _.:/=+@-]{1,128}$": {
+          "type": "string",
+          "maxLength": 256
+        }
+      },
+      "description": "AWS resource tags"
+    },
+    "user_data": {
+      "type": "string",
+      "contentEncoding": "base64",
+      "description": "Base64-encoded startup script"
+    },
+    "root_block_device": {
+      "type": "object",
+      "properties": {
+        "volume_size": {
+          "type": "integer",
+          "minimum": 8,
+          "maximum": 16384
+        },
+        "volume_type": {
+          "type": "string",
+          "enum": ["gp2", "gp3", "io1", "standard"]
+        },
+        "encrypted": {
+          "type": "boolean"
+        }
+      }
+    }
+  },
+  "if": {
+    "properties": {
+      "root_block_device": {
+        "properties": {
+          "volume_type": { "const": "io1" }
+        },
+        "required": ["volume_type"]
+      }
+    }
+  },
+  "then": {
+    "required": ["root_block_device.iops"],
+    "errorMessage": "IOPS required for io1 volume type"
+  },
+  "errorMessages": {
+    "ami": "Must be a valid AMI ID (ami-xxxxxxxx)",
+    "instance_type": "Invalid instance type (e.g., t3.micro, m5.large)",
+    "refs.vpc": "Must reference a valid VPC resource ID",
+    "id": "Must be a valid Terraform identifier (lowercase alphanumeric + hyphens)"
+  }
+}

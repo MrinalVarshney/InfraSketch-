@@ -11,6 +11,8 @@ class TemplateRegistry:
         "kubernetes_secret": "kubernetes/secret.yaml.j2",
         "kubernetes_config_map": "kubernetes/configMap.yaml.j2",
         "kubernetes_ingress": "kubernetes/ingress.yaml.j2",
+        "kubernetes_persistent_volume": "kubernetes/persistent_volume.yaml.j2",
+        "kubernetes_persistent_volume_claim": "kubernetes/persistentVolumeClaim.yaml.j2",
         "aws_ec2_instance": "aws/ec2.tf.j2",
         "aws_provider": "aws/provider.tf.j2",
         "aws_eip": "aws/eip/elastic_ip.tf.j2",

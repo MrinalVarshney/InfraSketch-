@@ -1,0 +1,89 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "AWS VPC Security Group Ingress Rule Configuration",
+    "type": "object",
+    "properties": {
+      "provider": {
+        "type": "string",
+        "description": "Infrastructure provider.",
+        "enum": ["aws"]
+      },
+      "type": {
+        "type": "string",
+        "description": "Resource type.",
+        "enum": ["vpc_security_group_ingress_rule"]
+      },
+      "id": {
+        "type": "string",
+        "description": "Unique identifier for the ingress rule.",
+        "pattern": "^[a-zA-Z0-9-_]+$"
+      },
+      "refs": {
+        "type": "object",
+        "description": "References to related AWS resources.",
+        "properties": {
+          "security_group": {
+            "type": "string",
+            "description": "Referenced security group ID.",
+            "pattern": "^[a-zA-Z0-9-_]+$"
+          }
+        },
+        "required": ["security_group"],
+        "additionalProperties": false
+      },
+      "protocol": {
+        "type": "string",
+        "description": "IP protocol (e.g., tcp, udp, icmp, -1)."
+      },
+      "from_port": {
+        "type": "integer",
+        "description": "Starting port range for ingress."
+      },
+      "to_port": {
+        "type": "integer",
+        "description": "Ending port range for ingress."
+      },
+      "cidr_blocks": {
+        "type": "array",
+        "description": "IPv4 CIDR blocks allowed.",
+        "items": {
+          "type": "string",
+          "pattern": "^\\d{1,3}(\\.\\d{1,3}){3}/\\d{1,2}$"
+        }
+      },
+      "ipv6_cidr_blocks": {
+        "type": "array",
+        "description": "IPv6 CIDR blocks allowed.",
+        "items": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F:]+/[0-9]+$"
+        }
+      },
+      "description": {
+        "type": "string",
+        "description": "Optional description for the rule.",
+        "default": ""
+      },
+      "tags": {
+        "type": "object",
+        "description": "Resource tags.",
+        "patternProperties": {
+          "^\\w+$": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "required": [
+      "provider",
+      "type",
+      "id",
+      "refs",
+      "protocol",
+      "from_port",
+      "to_port"
+    ],
+    "additionalProperties": false
+  }
+  

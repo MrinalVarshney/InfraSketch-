@@ -1,0 +1,95 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Application Server Configuration",
+  "type": "object",
+  "properties": {
+    "provider": {
+      "type": "string",
+      "description": "Defines the infrastructure provider.",
+      "enum": ["docker", "kubernetes"]
+    },
+    "type": {
+      "type": "string",
+      "description": "Defines the service type.",
+      "enum": ["application-server"]
+    },
+    "name": {
+      "type": "string",
+      "description": "The name of the application server service.",
+      "pattern": "^[a-zA-Z0-9-_]+$"
+    },
+    "image": {
+      "type": "string",
+      "description": "The Docker image to use for the application server service.",
+      "enum": [
+        "nginx",
+        "apache",
+        "tomcat",
+        "node:18-alpine",
+        "python:3.10-slim"
+      ],
+      "default": "nginx"
+    },
+    "ports": {
+      "type": "object",
+      "properties": {
+        "host": {
+          "type": "integer",
+          "description": "Host port for the application server."
+        },
+        "container": {
+          "type": "integer",
+          "description": "Container port for the application server."
+        }
+      },
+      "required": ["host", "container"]
+    },
+    "connects_to": {
+      "type": "array",
+      "description": "List of services this application server connects to.",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-zA-Z0-9-_]+$"
+      }
+    },
+    "code_mount": {
+      "type": "object",
+      "description": "Mount point for application code.",
+      "properties": {
+        "host_path": {
+          "type": "string",
+          "description": "Path on the host machine."
+        },
+        "container_path": {
+          "type": "string",
+          "description": "Path inside the container."
+        }
+      },
+      "required": ["host_path", "container_path"]
+    },
+    "env": {
+      "type": "array",
+      "description": "Environment variables for the application server.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the environment variable."
+          },
+          "value": {
+            "type": "string",
+            "description": "Value of the environment variable."
+          }
+        },
+        "required": ["name", "value"]
+      }
+    },
+    "network": {
+      "type": "string",
+      "description": "Docker network name to connect the application server container."
+    }
+  },
+  "required": ["provider", "type", "name", "image", "ports"],
+  "additionalProperties": false
+}

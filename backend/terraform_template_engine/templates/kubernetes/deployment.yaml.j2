@@ -57,5 +57,28 @@ spec:
               {% endif %}
             {% endfor %}
           {% endif %}
+          {% if container.volumeMounts %}
+          volumeMounts:
+            {% for volumeMount in container.volumeMounts %}
+            - name: {{ volumeMount.name }}
+              mountPath: {{ volumeMount.mountPath }}
+              {% if volumeMount.readOnly is defined %}
+              readOnly: {{ volumeMount.readOnly }}
+              {% endif %}
+              {% if volumeMount.subPath %}
+              subPath: {{ volumeMount.subPath }}
+              {% endif %}
+            {% endfor %}
+          {% endif %}
         {% endfor %}
         {% endif %}
+      {% if spec and spec.template and spec.template.spec and spec.template.spec.volumes %}
+      volumes:
+        {% for volume in spec.template.spec.volumes %}
+        - name: {{ volume.name }}
+          {% if volume.persistentVolumeClaim %}
+          persistentVolumeClaim:
+            claimName: {{ volume.persistentVolumeClaim.claimName }}
+          {% endif %}
+        {% endfor %}
+      {% endif %}

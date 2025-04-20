@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://example.com/pvc.schema.json",
+  "title": "PersistentVolumeClaim Validation Schema",
+  "type": "object",
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "spec": {
+      "type": "object",
+      "properties": {
+        "storageClassName": {
+          "type": "string"
+        },
+        "accessModes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["ReadWriteOnce", "ReadOnlyMany", "ReadWriteMany"]
+          },
+          "minItems": 1
+        },
+        "resources": {
+          "type": "object",
+          "properties": {
+            "requests": {
+              "type": "object",
+              "properties": {
+                "storage": {
+                  "type": "string",
+                  "pattern": "^\\d+(Gi|Mi)$"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "selector": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": false
+    },
+    "app_label": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

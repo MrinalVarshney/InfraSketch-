@@ -16,6 +16,22 @@ class TerraformOrchestrator:
                 # Initialize structure for this infra
                 tf_blocks[infra_name] = {"k8s": {}, "tf": []}
 
+                is_aws = False
+
+                if "services" in infra:
+                    for service in infra["services"]:
+                        provider = service.get("provider")
+                        if provider == "aws":
+                            is_aws = True
+                            break
+
+                if(is_aws):
+                    #append provider to the list
+                    template_name = "aws_provider"
+                    generator = GenericTemplateGenerator(service, self.template_registry, template_name)
+                    rendered_template = generator.render()
+                    tf_blocks[infra_name]["tf"].append(rendered_template)
+
                 if "services" in infra:
                     for service in infra["services"]:
                         provider = service.get("provider")
@@ -29,8 +45,8 @@ class TerraformOrchestrator:
                             tf_blocks[infra_name]["k8s"][service_name] = {"type": "yaml", "code": rendered_template}
                         else:
                             try:
-                                print(rendered_template)
-                                tf_blocks[infra_name]["tf"].append(rendered_template)
+                                
+                                tf_blocks[infra_name]["tf"].append('\n'+rendered_template+'\n')
                             except Exception as e:
                                 print(f"Error rendering template for {provider}: {e}")
                                 raise e

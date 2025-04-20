@@ -1,0 +1,141 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Database Configuration",
+  "type": "object",
+  "properties": {
+    "provider": {
+      "type": "string",
+      "description": "Defines the infrastructure provider.",
+      "enum": ["docker", "kubernetes"]
+    },
+    "type": {
+      "type": "string",
+      "description": "Defines the service type.",
+      "enum": ["database"]
+    },
+    "name": {
+      "type": "string",
+      "description": "The name of the database service.",
+      "pattern": "^[a-zA-Z0-9-_]+$"
+    },
+    "image": {
+      "type": "string",
+      "description": "The Docker image to use for the database service.",
+      "enum": [
+        "postgres:14-alpine",
+        "postgres:latest",
+        "mysql:latest",
+        "mongo:latest",
+        "redis:latest"
+      ],
+      "default": "postgres:14-alpine"
+    },
+    "ports": {
+      "type": "object",
+      "properties": {
+        "host": {
+          "type": "integer",
+          "description": "Host port for the database service."
+        },
+        "container": {
+          "type": "integer",
+          "description": "Container port for the database service."
+        }
+      },
+      "required": ["host"]
+    },
+    "env": {
+      "type": "array",
+      "description": "Environment variables for the database service.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "value": { "type": "string" }
+        },
+        "required": ["name", "value"]
+      }
+    },
+    "code_mount": {
+      "type": "object",
+      "properties": {
+        "host_path": { "type": "string" },
+        "container_path": { "type": "string" }
+      },
+      "required": ["host_path", "container_path"]
+    }
+  },
+  "required": ["provider", "type", "name", "image", "ports"],
+  "allOf": [
+    {
+      "if": {
+        "properties": { "image": { "const": "postgres:14-alpine" } }
+      },
+      "then": {
+        "properties": {
+          "ports": {
+            "properties": {
+              "container": { "default": 5432 }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "image": { "const": "postgres:latest" } }
+      },
+      "then": {
+        "properties": {
+          "ports": {
+            "properties": {
+              "container": { "default": 5432 }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "image": { "const": "mysql:latest" } }
+      },
+      "then": {
+        "properties": {
+          "ports": {
+            "properties": {
+              "container": { "default": 3306 }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "image": { "const": "mongo:latest" } }
+      },
+      "then": {
+        "properties": {
+          "ports": {
+            "properties": {
+              "container": { "default": 27017 }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "image": { "const": "redis:latest" } }
+      },
+      "then": {
+        "properties": {
+          "ports": {
+            "properties": {
+              "container": { "default": 6379 }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

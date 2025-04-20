@@ -1,0 +1,26 @@
+{
+    "project": "test",
+    "services": [
+      {
+        "id": "aws-compute-1",
+        "provider": "aws",
+        "type": "ec2_instance",
+        "name": "",
+        "ami": "",
+        "instance_type": "",
+        "tags": {},
+        "refs": {}
+      },
+      {
+        "id": "aws-storage-2",
+        "provider": "aws",
+        "bucket": "",
+        "region": "",
+        "acl": "private",
+        "versioning": {
+          "enabled": false
+        },
+        "tags": {}
+      }
+    ]
+  }
