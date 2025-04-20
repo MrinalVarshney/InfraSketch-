@@ -19,7 +19,7 @@ import {
   ReactFlowInstance,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-
+import toast from "react-hot-toast";
 import ServiceNode from "@/components/ServiceNode";
 import ServicePanel from "@/components/ServicePanel";
 import PropertiesPanel from "@/components/propertiesPanel/PropertiesPanel";
@@ -35,7 +35,6 @@ import {
   Maximize,
   X,
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import { getPropertiesByType } from "@/components/getPropertiesByType";
 import LabeledGroupNode from "@/components/LabeledGroupNode";
 import ResizableNode from "./ResizableNode";
@@ -81,7 +80,6 @@ export default function Home() {
   const [projectNames, setProjectNames] = useState<string[]>([]);
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [showProjectList, setShowProjectList] = useState(false);
-  const { toast } = useToast();
   const [hasMounted, setHasMounted] = useState(false);
 
   const [elasticIP_association, setElasticIPAssociation] = useState<
@@ -531,7 +529,10 @@ export default function Home() {
               data: {
                 ...data,
                 serviceName:
-                  data.properties.name || data.properties.bucket || data.label,
+                  data.properties?.name ||
+                  data.properties?.bucket ||
+                  data.properties?.metadata.name ||
+                  data.label,
               },
             };
           }
@@ -590,7 +591,9 @@ export default function Home() {
 
       if (!selectedProject) {
         setSelectedProject(diagramName);
-        //  const res = await axios.get(`/api/load-diagram-name?name=${diagramName}`);
+        const res = await axios.get(
+          `/api/load-diagram-name?name=${diagramName}`
+        );
         setProjectNames(res.data.map((project: any) => project.project_name));
       }
     } catch (err) {
@@ -704,7 +707,25 @@ export default function Home() {
     });
   }
 
-  function handleExport() {
+  async function validateInfra() {
+    const config = generateConfig();
+    try {
+      const response = await axios.post("http://localhost:5001/validate", {
+        config: config,
+      });
+      //Make sure it appear in the toast
+      console.log(response.data);
+      if (response.data.success) {
+        toast.success("Validation successful");
+      } else {
+        toast.error("Validation failed");
+      }
+    } catch (error) {
+      toast.error("Validation failed");
+    }
+  }
+
+  function generateConfig() {
     const { nodes: layoutedNodes } = getLayoutedElements(nodes, edges);
     console.log(nodes);
     const name = "test";
@@ -776,13 +797,15 @@ export default function Home() {
       console.log("kubernetes");
       console.log(nodes);
       nodes.map((node: Node) => {
+        console.log("node", node.data.rawLabel);
+        const properties =
+          typeof node.data.properties === "object" && node.data.properties
+            ? { ...node.data.properties, type: node.data.rawLabel }
+            : {};
         services.push({
           id: node.id,
-          type: node.data.rawLabel,
           provider: node.data.provider,
-          ...(typeof node.data.properties === "object" && node.data.properties
-            ? node.data.properties
-            : {}),
+          ...properties,
         });
       });
     }
@@ -796,18 +819,35 @@ export default function Home() {
       ],
     };
 
-    console.log("export  ", exportData);
+    return exportData;
+  }
 
+  async function handleExport() {
+    const exportData = generateConfig();
     // Trigger download
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${name}-infra.json`;
-    a.click();
-    URL.revokeObjectURL(url); // Clean up
+
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/generate",
+        exportData
+      );
+
+      const blob = new Blob([response.data], { type: "application/zip" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "kubernetes_files.zip");
+      document.body.appendChild(link);
+      link.click();
+      link.remove(); // Clean up
+    } catch (error) {
+      console.error("Error exporting diagram:", error);
+      toast({
+        title: "Error",
+        description: "Failed to export diagram.",
+        variant: "destructive",
+      });
+    }
   }
 
   return (
@@ -922,6 +962,10 @@ export default function Home() {
                 <Button variant="outline" size="sm" onClick={loadDiagram}>
                   <Save size={16} className="mr-1" />
                   Saved Projects
+                </Button>
+                <Button variant="outline" size="sm" onClick={validateInfra}>
+                  <Save size={16} className="mr-1" />
+                  Validate Configuration
                 </Button>
               </div>
             )}

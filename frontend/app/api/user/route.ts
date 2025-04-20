@@ -1,3 +1,20 @@
+
+// import { NEXT_AUTH_OPTIONS } from "../lib/auth";
+// import { getServerSession } from "next-auth";
+// import { NextResponse } from "next/server";
+
+// export async function GET(request: Request) {
+//     const session = await getServerSession(NEXT_AUTH_OPTIONS);
+
+//     return NextResponse.json({
+//         session,
+//         message: "Hello from the API route",
+//     });
+    
+// }
+
+
+// app/api/user/route.ts
 import { PrismaClient } from '@/prisma/generated/prisma'; // Adjust path if needed
 import bcrypt from 'bcryptjs';
 
