@@ -1,0 +1,54 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Redis Service Configuration",
+    "type": "object",
+    "properties": {
+      "provider": {
+        "type": "string",
+        "enum": ["docker", "kubernetes"],
+        "description": "Defines the infrastructure provider."
+      },
+      "type": {
+        "type": "string",
+        "enum": ["redis"],
+        "description": "Defines the service type."
+      },
+      "name": {
+        "type": "string",
+        "pattern": "^[a-zA-Z0-9-_]+$",
+        "description": "The name of the Redis service."
+      },
+      "image": {
+        "type": "string",
+        "description": "The Docker image to use for Redis.",
+        "default": "redis:latest"
+      },
+      "ports": {
+        "type": "object",
+        "properties": {
+          "redis_port": {
+            "type": "integer",
+            "description": "The port Redis will listen on.",
+            "default": 6379
+          }
+        },
+        "required": ["redis_port"]
+      },
+      "env": {
+        "type": "object",
+        "properties": {
+          "REDIS_PASSWORD": {
+            "type": "string",
+            "description": "Password for Redis authentication.",
+            "minLength": 4
+          }
+        }
+      },
+      "network": {
+        "type": "string",
+        "description": "Docker network name to connect the Redis container."
+      }
+    },
+    "required": ["provider", "type", "name", "ports"]
+  }
+  

@@ -1,0 +1,324 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AWS S3 Bucket Configuration",
+  "description": "Schema for validating the JSON structure for AWS S3 bucket resources with custom error messages.",
+  "type": "object",
+  "properties": {
+    "provider": {
+      "type": "string",
+      "enum": ["aws"],
+      "description": "The cloud provider for this resource.",
+      "$message": {
+        "enum": "Provider must be 'aws'."
+      }
+    },
+    "type": {
+      "type": "string",
+      "enum": ["s3_bucket"],
+      "description": "The type of AWS resource.",
+      "$message": {
+        "enum": "Type must be 's3_bucket'."
+      }
+    },
+    "id": {
+      "type": "string",
+      "description": "A unique identifier for this S3 bucket resource within your configuration.",
+      "$message": {
+        "type": "ID must be a string."
+      }
+    },
+    "bucket": {
+      "type": "string",
+      "description": "The name of the S3 bucket. Must be globally unique.",
+      "minLength": 3,
+      "maxLength": 63,
+      "pattern": "^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$",
+      "$message": {
+        "type": "Bucket name must be a string.",
+        "minLength": "Bucket name must be at least 3 characters long.",
+        "maxLength": "Bucket name cannot exceed 63 characters.",
+        "pattern": "Bucket name must start and end with an alphanumeric character and can only contain lowercase alphanumeric characters, periods (.), and hyphens (-)."
+      }
+    },
+    "region": {
+      "type": "string",
+      "description": "The AWS region where the S3 bucket will be created.",
+      "enum": [
+        "us-east-1",
+        "us-east-2",
+        "us-west-1",
+        "us-west-2",
+        "ap-northeast-1",
+        "ap-northeast-2",
+        "ap-southeast-1",
+        "ap-southeast-2",
+        "eu-central-1",
+        "eu-west-1",
+        "eu-west-2",
+        "eu-west-3",
+        "sa-east-1",
+        "ca-central-1",
+        "ap-south-1",
+        "ap-east-1",
+        "eu-north-1",
+        "me-south-1",
+        "af-south-1"
+      ],
+      "$message": {
+        "type": "Region must be a string.",
+        "enum": "Region must be a valid AWS region."
+      }
+    },
+    "acl": {
+      "type": ["string", "null"],
+      "enum": [
+        "private",
+        "public-read",
+        "public-read-write",
+        "authenticated-read",
+        "bucket-owner-read",
+        "bucket-owner-full-control",
+        "aws-exec-read",
+        null
+      ],
+      "description": "The canned ACL to apply to the S3 bucket. Note: This argument is deprecated and `aws_s3_bucket_acl` resource is recommended instead. Use null to omit.",
+      "$message": {
+        "type": "ACL must be a string or null.",
+        "enum": "ACL must be a valid canned ACL or null."
+      }
+    },
+    "versioning": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether versioning is enabled for the S3 bucket.",
+          "$message": {
+            "type": "Versioning 'enabled' must be a boolean value."
+          }
+        }
+      },
+      "required": ["enabled"],
+      "$message": {
+        "type": "Versioning must be an object.",
+        "required": "Versioning configuration is required and must include 'enabled'."
+      }
+    },
+    "tags": {
+      "type": "object",
+      "description": "A map of tags to assign to the bucket.",
+      "$message": {
+        "type": "Tags must be an object."
+      }
+    },
+    "lifecycle_rules": {
+      "type": ["array", "null"],
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the rule.",
+            "$message": {
+              "type": "Lifecycle rule 'id' must be a string."
+            }
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the rule is currently enabled.",
+            "$message": {
+              "type": "Lifecycle rule 'enabled' must be a boolean value."
+            }
+          },
+          "prefix": {
+            "type": ["string", "null"],
+            "description": "Object key prefix identifying one or more objects to which the rule applies.",
+            "$message": {
+              "type": "Lifecycle rule 'prefix' must be a string or null."
+            }
+          },
+          "abort_incomplete_multipart_upload_days": {
+            "type": ["integer", "null"],
+            "description": "Specifies the number of days after initiating a multipart upload that parts must be uploaded.",
+            "minimum": 1,
+            "$message": {
+              "type": "Lifecycle rule 'abort_incomplete_multipart_upload_days' must be an integer or null.",
+              "minimum": "Lifecycle rule 'abort_incomplete_multipart_upload_days' must be at least 1."
+            }
+          },
+          "expiration": {
+            "type": ["object", "null"],
+            "properties": {
+              "date": {
+                "type": ["string", "null"],
+                "format": "date-time",
+                "description": "Specifies the date after which the object expires.",
+                "$message": {
+                  "type": "Expiration 'date' must be a string in ISO 8601 format or null.",
+                  "format": "Expiration 'date' must be a valid ISO 8601 date-time string."
+                }
+              },
+              "days": {
+                "type": ["integer", "null"],
+                "description": "Specifies the number of days after object creation when the object expires.",
+                "minimum": 1,
+                "$message": {
+                  "type": "Expiration 'days' must be an integer or null.",
+                  "minimum": "Expiration 'days' must be at least 1."
+                }
+              },
+              "expired_object_delete_marker": {
+                "type": ["boolean", "null"],
+                "description": "Specifies whether Amazon S3 will remove a delete marker with no noncurrent versions.",
+                "$message": {
+                  "type": "Expiration 'expired_object_delete_marker' must be a boolean or null."
+                }
+              }
+            },
+            "description": "Configuration block for object expiration.",
+            "anyOf": [
+              { "required": ["date"] },
+              { "required": ["days"] },
+              { "required": ["expired_object_delete_marker"] }
+            ],
+            "$message": {
+              "type": "Expiration must be an object or null.",
+              "anyOf": "Expiration must contain at least one of 'date', 'days', or 'expired_object_delete_marker'."
+            }
+          },
+          "noncurrent_version_expiration": {
+            "type": ["object", "null"],
+            "properties": {
+              "days": {
+                "type": ["integer", "null"],
+                "description": "Specifies the number of days noncurrent object versions expire.",
+                "minimum": 1,
+                "$message": {
+                  "type": "Noncurrent version expiration 'days' must be an integer or null.",
+                  "minimum": "Noncurrent version expiration 'days' must be at least 1."
+                }
+              }
+            },
+            "description": "Configuration block for noncurrent object version expiration.",
+            "required": ["days"],
+            "$message": {
+              "type": "Noncurrent version expiration must be an object or null.",
+              "required": "Noncurrent version expiration must include 'days'."
+            }
+          },
+          "noncurrent_version_transition": {
+            "type": ["array", "null"],
+            "items": {
+              "type": "object",
+              "properties": {
+                "days": {
+                  "type": "integer",
+                  "description": "Specifies the number of days noncurrent object versions transition.",
+                  "minimum": 1,
+                  "$message": {
+                    "type": "Noncurrent version transition 'days' must be an integer.",
+                    "minimum": "Noncurrent version transition 'days' must be at least 1."
+                  }
+                },
+                "storage_class": {
+                  "type": "string",
+                  "enum": [
+                    "STANDARD_IA",
+                    "ONEZONE_IA",
+                    "GLACIER",
+                    "DEEP_ARCHIVE",
+                    "INTELLIGENT_TIERING"
+                  ],
+                  "description": "Specifies the storage class to transition noncurrent versions to.",
+                  "$message": {
+                    "enum": "Noncurrent version transition 'storage_class' must be a valid S3 storage class."
+                  }
+                }
+              },
+              "required": ["days", "storage_class"],
+              "$message": {
+                "required": "Each noncurrent version transition must include 'days' and 'storage_class'."
+              }
+            },
+            "description": "Configuration block for noncurrent object version transition.",
+            "$message": {
+              "type": "Noncurrent version transition must be an array or null."
+            }
+          },
+          "transition": {
+            "type": ["array", "null"],
+            "items": {
+              "type": "object",
+              "properties": {
+                "date": {
+                  "type": ["string", "null"],
+                  "format": "date-time",
+                  "description": "Specifies the date after which the object transitions.",
+                  "$message": {
+                    "type": "Transition 'date' must be a string in ISO 8601 format or null.",
+                    "format": "Transition 'date' must be a valid ISO 8601 date-time string."
+                  }
+                },
+                "days": {
+                  "type": ["integer", "null"],
+                  "description": "Specifies the number of days after object creation when the object transitions.",
+                  "minimum": 1,
+                  "$message": {
+                    "type": "Transition 'days' must be an integer or null.",
+                    "minimum": "Transition 'days' must be at least 1."
+                  }
+                },
+                "storage_class": {
+                  "type": "string",
+                  "enum": [
+                    "STANDARD_IA",
+                    "ONEZONE_IA",
+                    "GLACIER",
+                    "DEEP_ARCHIVE",
+                    "INTELLIGENT_TIERING"
+                  ],
+                  "description": "Specifies the storage class to transition objects to.",
+                  "$message": {
+                    "enum": "Transition 'storage_class' must be a valid S3 storage class."
+                  }
+                }
+              },
+              "required": ["storage_class"],
+              "anyOf": [{ "required": ["date"] }, { "required": ["days"] }],
+              "$message": {
+                "required": "Each transition must include 'storage_class'.",
+                "anyOf": "Each transition must include either 'date' or 'days'."
+              }
+            },
+            "description": "Configuration block for object transition.",
+            "$message": {
+              "type": "Transition must be an array or null."
+            }
+          }
+        },
+        "required": ["enabled"],
+        "anyOf": [
+          { "required": ["prefix"] },
+          { "required": ["expiration"] },
+          { "required": ["noncurrent_version_expiration"] },
+          { "required": ["noncurrent_version_transition"] },
+          { "required": ["transition"] },
+          { "required": ["abort_incomplete_multipart_upload_days"] }
+        ],
+        "$message": {
+          "required": "Each lifecycle rule must include 'enabled'.",
+          "anyOf": "Each lifecycle rule must specify at least one action (prefix, expiration, noncurrent_version_expiration, noncurrent_version_transition, transition, or abort_incomplete_multipart_upload_days)."
+        }
+      },
+      "description": "A list of lifecycle rules for the bucket.",
+      "$message": {
+        "type": "Lifecycle rules must be an array or null."
+      }
+    }
+  },
+  "required": ["provider", "type", "id", "bucket", "region", "versioning"],
+  "$message": {
+    "required": "The following fields are required: provider, type, id, bucket, region, versioning.",
+    "type": "Root must be an object."
+  }
+}

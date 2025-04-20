@@ -1,0 +1,96 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Nginx Load Balancer Service Configuration",
+  "type": "object",
+  "properties": {
+    "provider": {
+      "type": "string",
+      "enum": ["docker", "kubernetes"],
+      "description": "Defines the infrastructure provider."
+    },
+    "type": {
+      "type": "string",
+      "enum": ["loadbalancer"],
+      "description": "Defines the service type."
+    },
+    "name": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9-_]+$",
+      "description": "The name of the Load Balancer service."
+    },
+    "image": {
+      "type": "string",
+      "description": "The Docker image to use for the Nginx Load Balancer.",
+      "default": "nginx:latest"
+    },
+    "ports": {
+      "type": "object",
+      "properties": {
+        "http_port": {
+          "type": "integer",
+          "description": "Port for HTTP traffic.",
+          "default": 80
+        },
+        "https_port": {
+          "type": "integer",
+          "description": "Port for HTTPS traffic.",
+          "default": 443
+        }
+      },
+      "required": ["http_port"]
+    },
+    "env": {
+      "type": "object",
+      "description": "Optional environment variables for the Nginx container.",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "servers": {
+      "type": "array",
+      "description": "List of backend servers for the load balancer.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the backend server."
+          },
+          "port": {
+            "type": "integer",
+            "description": "Port on which the backend server is listening."
+          }
+        },
+        "required": ["name", "port"]
+      }
+    },
+    "volumes": {
+      "type": "array",
+      "description": "Additional volume mounts for Nginx.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "host_path": {
+            "type": "string",
+            "description": "Path on the host machine."
+          },
+          "container_path": {
+            "type": "string",
+            "description": "Path inside the container."
+          },
+          "read_only": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether the volume is mounted read-only."
+          }
+        },
+        "required": ["host_path", "container_path"]
+      }
+    },
+    "network": {
+      "type": "string",
+      "description": "Docker network name to connect the Nginx container."
+    }
+  },
+  "required": ["provider", "type", "servers", "name", "ports", "network"]
+}

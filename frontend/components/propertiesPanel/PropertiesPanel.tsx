@@ -7,10 +7,10 @@ import SubnetFields from "./aws/SubnetFields";
 import InternetGatewayFields from "./aws/InternetGateway"; // ✅ Import here
 import { Node } from "@xyflow/react";
 import KubernetesFields from "./KubernetesFields";
-// import KubernetesDeploymentFields from "./k8s/deployment";
-// import KubernetesServiceFields from "./k8s/service";
-// import KubernetesIngressFields from "./k8s/ingress";
-// import KubernetesSecretFields from "./k8s/secret";
+import KubernetesDeploymentFields from "./k8s/deployment";
+import KubernetesServiceFields from "./k8s/service";
+import KubernetesIngressFields from "./k8s/ingress";
+import KubernetesSecretFields from "./k8s/secret";
 import SecurityGroupFields from "./aws/Security_group";
 
 import {

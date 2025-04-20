@@ -1,0 +1,53 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "AWS Security Group Configuration",
+    "type": "object",
+    "properties": {
+      "provider": {
+        "type": "string",
+        "description": "Defines the infrastructure provider.",
+        "enum": ["aws"]
+      },
+      "type": {
+        "type": "string",
+        "description": "Defines the resource type.",
+        "enum": ["security_group"]
+      },
+      "id": {
+        "type": "string",
+        "description": "Unique identifier for the security group resource.",
+        "pattern": "^[a-zA-Z0-9-_]+$"
+      },
+      "refs": {
+        "type": "object",
+        "description": "References to other resources.",
+        "properties": {
+          "vpc": {
+            "type": "string",
+            "description": "ID of the VPC the security group is associated with.",
+            "pattern": "^[a-zA-Z0-9-_]+$"
+          }
+        },
+        "required": ["vpc"],
+        "additionalProperties": false
+      },
+      "description": {
+        "type": "string",
+        "description": "Description for the security group."
+      },
+      "tags": {
+        "type": "object",
+        "description": "Tags to assign to the security group.",
+        "patternProperties": {
+          "^\\w+$": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "required": ["provider", "type", "id", "refs", "description"],
+    "additionalProperties": false
+  }
+
+  
