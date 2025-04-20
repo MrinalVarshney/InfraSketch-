@@ -117,8 +117,6 @@ MONGODB_URL="Your MongoDB URI"
 npm run dev
 ```
 
-Visit http://localhost:3000 to see the app in action.
-
 ---
 
 ### 2. Backend Setup:
