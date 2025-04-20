@@ -12,7 +12,7 @@
 
 ---
 
-[Video Link](https://drive.google.com/file/d/1I6DeUCko3kg5_A9w4dMJlgQRWjATsgbY/view?usp=drive_link) 
+[Video Link](https://drive.google.com/file/d/1I6DeUCko3kg5_A9w4dMJlgQRWjATsgbY/view?usp=drive_link) |[Presentation Link](https://docs.google.com/presentation/d/1c9yZ-Z6Jd1-Ib2GWKJZdKBooBFGtrE2P/edit?usp=drive_link&ouid=106787449728337787260&rtpof=true&sd=true)
 
 ---
 
@@ -89,11 +89,13 @@ Follow these steps to run the project locally:
 
 ```bash
 git clone https://github.com/MrinalVarshney/InfraSketch-
+cd InfraSketch-
 ```
 
-### 2. Install dependencies:
+### 2. Frontend Setup:
 
 ```bash
+cd frontend
 npm install
 ```
 
@@ -113,6 +115,48 @@ MONGODB_URL="Your MongoDB URI"
 
 ```bash
 npm run dev
+```
+
+Visit http://localhost:3000 to see the app in action.
+
+---
+
+### 2. Backend Setup:
+
+```bash
+cd backend
+
+```
+
+### 3. Run Terraform template Engine:
+
+```
+cd terraform_template_engine
+python -m venv myenv
+python3 -m venv myenv
+source myenv/bin/activate
+uvicorn main:app --reload
+```
+
+
+### 4. Run the development server:
+
+```bash
+cd ..
+cd ..
+cd frontend
+npm run dev
+```
+
+###5. Run Nodejs Server:
+
+```
+cd ..
+cd backend
+cd validation_service
+npm i
+tsc -b
+node dist/index.js
 ```
 
 Visit http://localhost:3000 to see the app in action.
