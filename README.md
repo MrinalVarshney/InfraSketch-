@@ -14,6 +14,8 @@
 
 [Video Link](https://drive.google.com/file/d/1I6DeUCko3kg5_A9w4dMJlgQRWjATsgbY/view?usp=drive_link) | [Presentation Link](https://docs.google.com/presentation/d/1c9yZ-Z6Jd1-Ib2GWKJZdKBooBFGtrE2P/edit?usp=drive_link&ouid=106787449728337787260&rtpof=true&sd=true)
 
+[🚀 Project in Action: Clean and intuitive UI](http://drive.google.com/file/d/1CvidPiheISM8qxaHEMQs9EloVt7q2RwR/view)
+
 ---
 
 # InfraSketch: Design. Visualize. Deploy.
