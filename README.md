@@ -18,7 +18,7 @@
 
 # 🚀 Project in Action: Clean and intuitive UI
 
-## ![App Screenshot](https://drive.google.com/file/d/1CvidPiheISM8qxaHEMQs9EloVt7q2RwR/view)
+## ![App Screenshot](InfraSketch.png)
 
 ---
 
