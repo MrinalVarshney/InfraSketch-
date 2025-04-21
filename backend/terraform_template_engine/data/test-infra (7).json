@@ -1,0 +1,49 @@
+{
+  "project": "test",
+  "services": [
+    {
+      "id": "kubernetes-kubernetes-1",
+      "type": "deployment",
+      "provider": "kubernetes",
+      "metadata": {
+        "name": "",
+        "labels": {}
+      },
+      "spec": {
+        "replicas": 1,
+        "selector": {
+          "matchLabels": {}
+        },
+        "template": {
+          "metadata": {
+            "labels": {}
+          },
+          "spec": {
+            "containers": []
+          }
+        }
+      }
+    },
+    {
+      "id": "kubernetes-network-2",
+      "type": "service",
+      "provider": "kubernetes",
+      "metadata": {
+        "name": "",
+        "labels": {},
+        "annotations": {}
+      },
+      "spec": {
+        "type": "",
+        "selector": {},
+        "ports": [
+          {
+            "port": 80
+          }
+        ],
+        "clusterIP": "",
+        "externalIPs": []
+      }
+    }
+  ]
+}

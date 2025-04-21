@@ -45,7 +45,7 @@ class TerraformOrchestrator:
                             tf_blocks[infra_name]["k8s"][service_name] = {"type": "yaml", "code": rendered_template}
                         else:
                             try:
-                                
+                                print(rendered_template)
                                 tf_blocks[infra_name]["tf"].append('\n'+rendered_template+'\n')
                             except Exception as e:
                                 print(f"Error rendering template for {provider}: {e}")

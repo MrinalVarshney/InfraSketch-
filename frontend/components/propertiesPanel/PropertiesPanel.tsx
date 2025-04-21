@@ -12,8 +12,7 @@ import KubernetesServiceFields from "./k8s/service";
 import KubernetesIngressFields from "./k8s/ingress";
 import KubernetesSecretFields from "./k8s/secret";
 import SecurityGroupFields from "./aws/Security_group";
-import KubernetesPersistentVolumeFields from "./k8s/persistentVolume";
-import KubernetesPersistentVolumeClaimFields from "./k8s/persistentVolumeClaim";
+
 import {
   ServiceProviderType,
   K8sServiceType,
@@ -73,22 +72,6 @@ export default function PropertiesPanel({
         case "Ingress":
           return (
             <KubernetesIngressFields
-              selectedNode={selectedNode}
-              onNodeUpdate={onNodeUpdate}
-            />
-          );
-
-        case "PersistentVolume":
-          return (
-            <KubernetesPersistentVolumeFields
-              selectedNode={selectedNode}
-              onNodeUpdate={onNodeUpdate}
-            />
-          );
-
-        case "PersistentVolumeClaim":
-          return (
-            <KubernetesPersistentVolumeClaimFields
               selectedNode={selectedNode}
               onNodeUpdate={onNodeUpdate}
             />

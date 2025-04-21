@@ -2,13 +2,13 @@ import { ServiceData } from "@/types/service";
 
 export const services: ServiceData = {
   aws: [
-    { label: "EC2", type: "compute", rawLabel: "ec2_instance" },
+    { label: "EC2", type: "compute", rawLabel: "aws_instance" },
     { label: "S3", type: "storage", rawLabel: "s3_bucket" },
     { label: "RDS", type: "database", rawLabel: "rds_instance" },
     { label: "VPC", type: "network", rawLabel: "vpc" },
     { label: "ECS", type: "container", rawLabel: "ecs_cluster" },
     { label: "EKS", type: "kubernetes", rawLabel: "eks_cluster" },
-    { label: "ElasticIP", type: "elastic", rawLabel: "eip" },
+    { label: "ElasticIP", type: "elastic", rawLabel: "aws_eip" },
     {
       label: "InternetGateway",
       type: "InternetGateway",
@@ -55,11 +55,6 @@ export const services: ServiceData = {
       label: "PersistentVolume",
       type: "storage",
       rawLabel: "persistent_volume",
-    },
-    {
-      label: "PersistentVolumeClaim",
-      type: "storage",
-      rawLabel: "persistent_volume_claim",
     },
     { label: "Ingress", type: "network", rawLabel: "ingress" },
     { label: "NameSpace", type: "kubernetes", rawLabel: "namespace" },

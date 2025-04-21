@@ -5,7 +5,9 @@ metadata:
   namespace: {{ metadata.namespace | default("default") }}
   {% if metadata.annotations %}
   annotations:
-    kubernetes.io/ingress.className: nginx
+    {% for key, value in metadata.annotations.items() %}
+    {{ key }}: {{ value | tojson }}
+    {% endfor %}
   {% endif %}
 spec:
   {% if tls %}

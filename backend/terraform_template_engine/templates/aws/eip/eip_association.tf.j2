@@ -2,11 +2,4 @@ resource "aws_eip_association" {{id.replace('-','_')}} {
   instance_id   = aws_instance.{{refs.instance.replace('-','_')}}.id
   allocation_id = aws_eip.{{refs.eip.replace('-','_')}}.id
 
-  {% if depends_on %}
-    depends_on = [
-    {% for dep in depends_on %}
-      {{dep.type.replace('-','_')}}.{{dep.id.replace('-','_')}}{% if not loop.last %},{% endif %}
-    {% endfor %}
-    ]
-    {% endif %}
 }

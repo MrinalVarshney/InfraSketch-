@@ -371,7 +371,6 @@ export default function KubernetesIngressFields({
   }, [selectedNode, reset]);
 
   const onSubmit = (values: FormValues) => {
-    // console.log("Form submitted", values);
     if (selectedNode) {
       onNodeUpdate(selectedNode.id, {
         ...selectedNode.data,
@@ -465,7 +464,7 @@ export default function KubernetesIngressFields({
         />
       </div> */}
 
-      {/* {ingressClass === "nginx" && (
+      {ingressClass === "nginx" && (
         <div className="grid gap-1.5">
           <Label>Rewrite Target</Label>
           <Input
@@ -487,7 +486,7 @@ export default function KubernetesIngressFields({
             </span>
           )}
         </div>
-      )} */}
+      )}
 
       <div className="space-y-4">
         <div className="flex justify-between items-center">

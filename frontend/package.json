@@ -62,7 +62,6 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.53.0",
-    "react-hot-toast": "^2.5.2",
     "react-textarea-autosize": "^8.5.9",
     "reactflow": "^11.11.4",
     "recharts": "^2.12.7",

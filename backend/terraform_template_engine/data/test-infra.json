@@ -5,6 +5,7 @@
       "services": [
         {
           "id": "kubernetes-kubernetes-1",
+          "type": "deployment",
           "provider": "kubernetes",
           "metadata": {
             "name": "mongo-deployment",
@@ -59,13 +60,12 @@
                 ]
               }
             }
-          },
-          "type": "deployment"
+          }
         },
         {
           "id": "kubernetes-network-2",
-          "provider": "kubernetes",
           "type": "service",
+          "provider": "kubernetes",
           "metadata": {
             "name": "mongo-service",
             "labels": {},
@@ -89,6 +89,7 @@
         },
         {
           "id": "kubernetes-secret-3",
+          "type": "secret",
           "provider": "kubernetes",
           "metadata": {
             "name": "db-credentials",
@@ -106,11 +107,11 @@
             "selector": {
               "app": "mongo-express"
             }
-          },
-          "type": "secret"
+          }
         },
         {
           "id": "kubernetes-kubernetes-4",
+          "type": "deployment",
           "provider": "kubernetes",
           "metadata": {
             "name": "mongo-express-deployment",
@@ -183,13 +184,12 @@
                 ]
               }
             }
-          },
-          "type": "deployment"
+          }
         },
         {
           "id": "kubernetes-network-5",
-          "provider": "kubernetes",
           "type": "service",
+          "provider": "kubernetes",
           "metadata": {
             "name": "mongo-express",
             "labels": {},
@@ -213,6 +213,7 @@
         },
         {
           "id": "kubernetes-storage-6",
+          "type": "config_map",
           "provider": "kubernetes",
           "metadata": {
             "name": "mongo-express-config",
@@ -228,13 +229,12 @@
             "selector": {
               "app": "mongo-express"
             }
-          },
-          "type": "config_map"
+          }
         },
         {
           "id": "",
-          "provider": "kubernetes",
           "type": "ingress",
+          "provider": "kubernetes",
           "metadata": {
             "name": "my-ingress",
             "annotations": {
@@ -270,252 +270,9 @@
                   ]
                 },
                 "host": "mongo.com"
-              },
-              {
-                "http": {
-                  "paths": [
-                    {
-                      "path": "/",
-                      "pathType": "Prefix",
-                      "backend": {
-                        "service": {
-                          "name": "wordpress-service",
-                          "port": 80
-                        }
-                      }
-                    }
-                  ]
-                },
-                "host": "wordpress.com"
               }
             ],
             "tls": []
-          }
-        },
-        {
-          "id": "kubernetes-kubernetes-8",
-          "provider": "kubernetes",
-          "metadata": {
-            "name": "wordpress-deployement",
-            "labels": {
-              "app": "wordpress"
-            }
-          },
-          "spec": {
-            "replicas": 1,
-            "selector": {
-              "matchLabels": {
-                "app": "wordpress"
-              }
-            },
-            "template": {
-              "metadata": {
-                "labels": {
-                  "app": "wordpress"
-                }
-              },
-              "spec": {
-                "containers": [
-                  {
-                    "name": "wordpress",
-                    "image": "wordpress:latest",
-                    "env": [
-                      {
-                        "name": "WORDPRESS_DB_HOST",
-                        "value": "mysql:3306"
-                      },
-                      {
-                        "name": "WORDPRESS_DB_PASSWORD",
-                        "valueFrom": {
-                          "secretKeyRef": {
-                            "name": "secret-safe",
-                            "key": "password"
-                          }
-                        }
-                      }
-                    ],
-                    "ports": [
-                      {
-                        "containerPort": 80
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
-          },
-          "type": "deployment"
-        },
-        {
-          "id": "kubernetes-secret-9",
-          "provider": "kubernetes",
-          "metadata": {
-            "name": "secret-safe",
-            "labels": {
-              "app": "secrets"
-            },
-            "annotations": {}
-          },
-          "secret_type": "Opaque",
-          "data": {
-            "password": "cGFzc3dvcmQ="
-          },
-          "spec": {
-            "selector": {
-              "app": "mysql"
-            }
-          },
-          "type": "secret"
-        },
-        {
-          "id": "kubernetes-network-10",
-          "provider": "kubernetes",
-          "type": "service",
-          "metadata": {
-            "name": "wordpress-service",
-            "labels": {},
-            "annotations": {}
-          },
-          "spec": {
-            "type": "ClusterIP",
-            "selector": {
-              "app": "wordpress"
-            },
-            "ports": [
-              {
-                "port": 80,
-                "name": "http",
-                "targetPort": 80
-              }
-            ],
-            "clusterIP": "",
-            "externalIPs": []
-          }
-        },
-        {
-          "id": "",
-          "provider": "kubernetes",
-          "type": "persistent_volume",
-          "metadata": {
-            "name": "my-pv"
-          },
-          "spec": {
-            "capacity": {
-              "storage": "5Gi"
-            },
-            "accessModes": "ReadWriteOnce",
-            "type": "local",
-            "hostPath": {
-              "path": "/data/sql"
-            },
-            "storageClassName": "manual"
-          }
-        },
-        {
-          "id": "",
-          "provider": "kubernetes",
-          "type": "persistent_volume_claim",
-          "metadata": {
-            "name": "my-pvc-claim",
-            "namespace": "default"
-          },
-          "spec": {
-            "accessModes": "ReadWriteOnce",
-            "resources": {
-              "requests": {
-                "storage": "5Gi"
-              }
-            },
-            "storageClassName": "manual"
-          }
-        },
-        {
-          "id": "kubernetes-kubernetes-13",
-          "provider": "kubernetes",
-          "metadata": {
-            "name": "mysql-deployment",
-            "labels": {
-              "app": "mysql"
-            }
-          },
-          "spec": {
-            "replicas": 2,
-            "selector": {
-              "matchLabels": {
-                "app": "mysql"
-              }
-            },
-            "template": {
-              "metadata": {
-                "labels": {
-                  "app": "mysql"
-                }
-              },
-              "spec": {
-                "containers": [
-                  {
-                    "name": "mysql",
-                    "image": "mysql:5.7",
-                    "env": [
-                      {
-                        "name": "MYSQL_ROOT_PASSWORD",
-                        "valueFrom": {
-                          "secretKeyRef": {
-                            "name": "secret-safe",
-                            "key": "password"
-                          }
-                        }
-                      }
-                    ],
-                    "ports": [
-                      {
-                        "containerPort": 3306
-                      }
-                    ],
-                    "volumeMounts": [
-                      {
-                        "name": "sql-stora",
-                        "mountPath": "/var/lib/mysql"
-                      }
-                    ]
-                  }
-                ],
-                "volumes": [
-                  {
-                    "name": "sql-stora",
-                    "persistentVolumeClaim": {
-                      "claimName": "my-pvc-claim"
-                    }
-                  }
-                ]
-              }
-            }
-          },
-          "type": "deployment"
-        },
-        {
-          "id": "kubernetes-network-14",
-          "provider": "kubernetes",
-          "type": "service",
-          "metadata": {
-            "name": "mysql-service",
-            "labels": {},
-            "annotations": {}
-          },
-          "spec": {
-            "type": "ClusterIP",
-            "selector": {
-              "app": "mysql"
-            },
-            "ports": [
-              {
-                "port": 3306,
-                "name": "http",
-                "targetPort": 3306
-              }
-            ],
-            "clusterIP": "",
-            "externalIPs": []
           }
         }
       ]

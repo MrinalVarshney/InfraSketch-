@@ -160,7 +160,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/home/mrinal/Desktop/infrasketch/frontend/prisma/generated/prisma",
+      "value": "/home/shivansh/learning/temp/InfraSketch/frontend/prisma/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -174,7 +174,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/home/mrinal/Desktop/infrasketch/frontend/prisma/schema.prisma",
+    "sourceFilePath": "/home/shivansh/learning/temp/InfraSketch/frontend/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {

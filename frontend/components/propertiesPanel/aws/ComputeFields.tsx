@@ -65,9 +65,9 @@ export default function ComputeFields({
 
   // for the OS selection
   const awsOptions = [
-    { label: "Amazon Linux 2", value: "ami-0c02fb55956c7d316" },
-    { label: "Ubuntu 20.04", value: "ami-0a313d6098716f372" },
-    { label: "Windows Server 2019", value: "ami-061392db613a6357b" },
+    { label: "Amazon Linux", value: "ami-0f1dcc636b69a6438" },
+    { label: "Ubuntu 24.04", value: "ami-0e35ddab05955cf57" },
+    // { label: "Windows Server 2019", value: "ami-061392db613a6357b" },
   ];
 
   const gcpOptions = [

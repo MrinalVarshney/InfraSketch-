@@ -19,7 +19,7 @@ import {
   ReactFlowInstance,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-// import toast from "react-hot-toast";
+
 import ServiceNode from "@/components/ServiceNode";
 import ServicePanel from "@/components/ServicePanel";
 import PropertiesPanel from "@/components/propertiesPanel/PropertiesPanel";
@@ -35,6 +35,7 @@ import {
   Maximize,
   X,
 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import { getPropertiesByType } from "@/components/getPropertiesByType";
 import LabeledGroupNode from "@/components/LabeledGroupNode";
 import ResizableNode from "./ResizableNode";
@@ -80,6 +81,7 @@ export default function Home() {
   const [projectNames, setProjectNames] = useState<string[]>([]);
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [showProjectList, setShowProjectList] = useState(false);
+  const { toast } = useToast();
   const [hasMounted, setHasMounted] = useState(false);
 
   const [elasticIP_association, setElasticIPAssociation] = useState<
@@ -146,8 +148,8 @@ export default function Home() {
       try {
         const data = JSON.parse(dataStr);
         const position = screenToFlowPosition({
-          x: event.clientX,
-          y: event.clientY,
+          x: event.clientX || 0,
+          y: event.clientY || 0,
         });
         console.log("data", data);
         let newNode = {
@@ -171,14 +173,14 @@ export default function Home() {
         });
       } catch (error) {
         console.error("Error parsing drag data:", error);
-        // toast({
-        //   title: "Error adding service",
-        //   description: "Failed to add service to canvas.",
-        //   variant: "destructive",
-        // });
+        toast({
+          title: "Error adding service",
+          description: "Failed to add service to canvas.",
+          variant: "destructive",
+        });
       }
     },
-    [screenToFlowPosition, nodes, setNodes]
+    [screenToFlowPosition, nodes, setNodes, toast]
   );
 
   const handleConnect = useCallback(
@@ -531,8 +533,7 @@ export default function Home() {
                 serviceName:
                   data.properties?.name ||
                   data.properties?.bucket ||
-                  data.properties?.metadata.name ||
-                  data.label,
+                  data?.label,
               },
             };
           }
@@ -832,7 +833,6 @@ export default function Home() {
   async function handleExport() {
     const exportData = generateConfig();
     // Trigger download
-
     try {
       // utils/downloadZip.ts
       const response = await fetch("http://localhost:8000/generate", {
@@ -853,7 +853,6 @@ export default function Home() {
       document.body.appendChild(a);
       a.click();
       a.remove();
-
       const link = document.createElement("a");
       link.href = url;
       link.setAttribute("download", "kubernetes_files.zip");
@@ -952,9 +951,9 @@ export default function Home() {
                 <Separator />
                 {projectNames.length > 0 ? (
                   <div className="grid gap-2">
-                    {projectNames.map((name) => (
+                    {projectNames.map((name, ind) => (
                       <Button
-                        key={name}
+                        key={ind}
                         variant="outline"
                         className="justify-start"
                         onClick={() => loadSpecificDiagram(name)}
@@ -979,13 +978,13 @@ export default function Home() {
                   <Save size={16} className="mr-1" />
                   Export
                 </Button>
+                <Button variant="outline" size="sm" onClick={validateInfra}>
+                  <Save size={16} className="mr-1" />
+                  Validate Infrastructure
+                </Button>
                 <Button variant="outline" size="sm" onClick={loadDiagram}>
                   <Save size={16} className="mr-1" />
                   Saved Projects
-                </Button>
-                <Button variant="outline" size="sm" onClick={validateInfra}>
-                  <Save size={16} className="mr-1" />
-                  Validate Configuration
                 </Button>
               </div>
             )}
